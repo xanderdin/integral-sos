@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="alarm_sound_list_titles">
+        <item>No sound</item>
+        <item>Siren with a beat</item>
+        <item>Broad range siren</item>
+        <item>Dubstep buzzer</item>
+        <item>Hurry up alarm</item>
+        <item>Time machine siren</item>
+        <item>Mixed funny alarm</item>
+        <item>Alien invasion siren</item>
+        <item>Emergency buzzer</item>
+        <item>Chamber lock siren</item>
+    </string-array>
+
+    <string-array name="alarm_sound_list_values">
+        <item/>
+        <item>alarm_sound_01</item>
+        <item>alarm_sound_02</item>
+        <item>alarm_sound_03</item>
+        <item>alarm_sound_04</item>
+        <item>alarm_sound_05</item>
+        <item>alarm_sound_06</item>
+        <item>alarm_sound_07</item>
+        <item>alarm_sound_08</item>
+        <item>alarm_sound_09</item>
+    </string-array>
+
+
+    <string-array name="info_sound_list_titles">
+        <item>No sound</item>
+        <item>Info Sound 01</item>
+        <item>Info Sound 02</item>
+        <item>Info Sound 03</item>
+        <item>Info Sound 04</item>
+        <item>Info Sound 05</item>
+        <item>Info Sound 06</item>
+        <item>Info Sound 07</item>
+        <item>Info Sound 08</item>
+        <item>Info Sound 09</item>
+        <item>Info Sound 10</item>
+        <item>Info Sound 11</item>
+        <item>Info Sound 12</item>
+        <item>Info Sound 13</item>
+        <item>Info Sound 14</item>
+        <item>Info Sound 15</item>
+    </string-array>
+
+    <string-array name="info_sound_list_values">
+        <item/>
+        <item>info_sound_01</item>
+        <item>info_sound_02</item>
+        <item>info_sound_03</item>
+        <item>info_sound_04</item>
+        <item>info_sound_05</item>
+        <item>info_sound_06</item>
+        <item>info_sound_07</item>
+        <item>info_sound_08</item>
+        <item>info_sound_09</item>
+        <item>info_sound_10</item>
+        <item>info_sound_11</item>
+        <item>info_sound_12</item>
+        <item>info_sound_13</item>
+        <item>info_sound_14</item>
+        <item>info_sound_15</item>
+    </string-array>
+
+
+    <string-array name="tick_sound_list_titles">
+        <item>No sound</item>
+        <item>Tick Sound 01</item>
+        <item>Tick Sound 02</item>
+        <item>Tick Sound 03</item>
+        <item>Tick Sound 04</item>
+        <item>Tick Sound 05</item>
+        <item>Tick Sound 06</item>
+    </string-array>
+
+    <string-array name="tick_sound_list_values">
+        <item/>
+        <item>tick_sound_01</item>
+        <item>tick_sound_02</item>
+        <item>tick_sound_03</item>
+        <item>tick_sound_04</item>
+        <item>tick_sound_05</item>
+        <item>tick_sound_06</item>
+    </string-array>
+
+</resources>

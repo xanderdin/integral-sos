@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:drawable/editbox_background_normal">
+
+    <ImageView
+        android:id="@+id/zone_lock_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_question"
+        android:scaleType="center"/>
+
+    <ImageView
+        android:id="@+id/zone_attention_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_action_attention"
+        android:layout_alignLeft="@id/zone_lock_icon"
+        android:layout_alignTop="@id/zone_lock_icon"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="00"
+        android:gravity="center"
+        android:singleLine="true"
+        android:id="@+id/zone_num"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zone_lock_icon"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Text"
+        android:gravity="center"
+        android:id="@+id/zone_name"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"/>
+
+</RelativeLayout>

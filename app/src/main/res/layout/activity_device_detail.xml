@@ -1,0 +1,196 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                tools:context="ua.integral.sos.app.DeviceDetailActivity">
+
+    <RelativeLayout
+        android:id="@+id/layout_device_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:longClickable="true"
+        android:onClick="onClick"
+        android:background="@android:drawable/editbox_background_normal">
+
+        <ImageView
+            android:id="@+id/image_lock_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:src="@drawable/ic_question"
+            android:scaleType="center"/>
+
+        <ImageView
+            android:id="@+id/image_tamper_indicator"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="center"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_action_question"/>
+
+        <ImageView
+            android:id="@+id/image_online_indicator"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="center"
+            android:layout_toLeftOf="@id/image_tamper_indicator"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_action_question"/>
+
+        <ImageView
+            android:id="@+id/image_power_indicator"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="center"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/image_tamper_indicator"
+            android:src="@drawable/ic_action_question"/>
+
+        <ImageView
+            android:id="@+id/image_battery_indicator"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:scaleType="center"
+            android:layout_below="@id/image_online_indicator"
+            android:layout_toLeftOf="@id/image_power_indicator"
+            android:src="@drawable/ic_action_question"/>
+
+        <ImageView
+            android:id="@+id/image_failure_indicator"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:scaleType="center"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_failure"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/text_device_name"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_toRightOf="@id/image_lock_icon"
+            android:layout_toLeftOf="@id/image_online_indicator"
+            android:layout_alignTop="@id/image_lock_icon"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"/>
+
+        <TextView
+            android:id="@+id/text_device_info"
+            android:layout_width="fill_parent"
+            android:layout_height="32dp"
+            android:layout_toRightOf="@id/image_lock_icon"
+            android:layout_toLeftOf="@id/image_online_indicator"
+            android:layout_below="@id/text_device_name"
+            android:layout_alignBottom="@id/image_lock_icon"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Small Text"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"/>
+
+    </RelativeLayout>
+
+
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/layout_device_tabs"
+        android:layout_below="@id/layout_device_header"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:drawable/editbox_background_normal">
+
+        <TabHost
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tabHost"
+            android:layout_gravity="center_horizontal">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical">
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+                </TabWidget>
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+                    <LinearLayout
+                        android:id="@+id/tab_device_zones"
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <GridView
+                            android:id="@+id/zone_list"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:numColumns="auto_fit"/>
+
+                        <include layout="@layout/include_empty_zone_list"/>
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/tab_device_history"
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <ListView
+                            android:id="@+id/history_list"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:transcriptMode="alwaysScroll"
+                            android:stackFromBottom="true"/>
+
+                        <include layout="@layout/include_empty_history_list"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/tab_device_users"
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <ListView
+                            android:id="@+id/user_list"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"/>
+
+                        <include layout="@layout/include_empty_user_list"/>
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </TabHost>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+    <PreferenceScreen
+        android:key="sound_settings_key"
+        android:title="@string/pref_sound_settings_title"
+        android:persistent="false">
+    -->
+    <!--
+        <RingtonePreference
+            android:key="uri_sound_alarm"
+            android:title="@string/pref_uri_sound_alarm_title"
+            android:ringtoneType="alarm"
+            android:showDefault="true"
+            android:showSilent="true"
+            android:defaultValue="android.resource://my.pocket.tomtit/raw/alarm_sound_01"/>
+    -->
+    <!--
+    </PreferenceScreen>
+    -->
+
+    <PreferenceCategory
+        android:title="@string/pref_device_title">
+
+        <EditTextPreference
+            android:key="max_history_records"
+            android:title="@string/pref_max_history_records_title"
+            android:defaultValue="1000"
+            android:numeric="integer"
+            android:maxLength="7"
+            android:singleLine="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_sound_settings_title">
+
+        <ua.integral.sos.app.SoundPickerDialog
+                android:key="uri_sound_alarm"
+                android:title="@string/pref_uri_sound_alarm_title"/>
+
+        <ua.integral.sos.app.SoundPickerDialog
+                android:key="uri_sound_info"
+                android:title="@string/pref_uri_sound_info_title"/>
+
+        <ua.integral.sos.app.SoundPickerDialog
+                android:key="uri_sound_tick"
+                android:title="@string/pref_uri_sound_tick_title"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_misc_title">
+
+        <ua.integral.sos.app.AboutDialog
+                android:title="@string/pref_about_app_title"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
