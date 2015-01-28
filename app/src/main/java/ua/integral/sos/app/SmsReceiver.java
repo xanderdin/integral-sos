@@ -35,10 +35,11 @@ public class SmsReceiver extends BroadcastReceiver {
                 smsMessages[i] = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
             }
             String tel = smsMessages[0].getDisplayOriginatingAddress();
-            String body = "";
+            StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < smsMessages.length; i++) {
-                body += smsMessages[i].getMessageBody();
+                stringBuilder.append(smsMessages[i].getMessageBody());
             }
+            String body = stringBuilder.toString();
             for (AlarmDevice alarmDevice : AlarmDeviceList.getList().values()) {
                 if (PhoneNumberUtils.compare(context, tel, alarmDevice.getTel())) {
                     Toast.makeText(context, "From: " + alarmDevice.getDevName() + ": " + body, Toast.LENGTH_LONG).show();

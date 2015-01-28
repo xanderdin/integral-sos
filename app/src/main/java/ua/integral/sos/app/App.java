@@ -3,6 +3,7 @@ package ua.integral.sos.app;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,7 +11,7 @@ import android.util.Log;
 /**
  * Created by aledin on 22.12.14.
  */
-public class App extends Application {
+public class App extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Override
     public void onCreate() {
@@ -28,6 +29,7 @@ public class App extends Application {
         CommonVar.setMaxHistoryRecords(Integer.valueOf(val));
 
         initSoundDefaultPreferences(sp);
+        initSounds();
 
         initAlarmDeviceList();
     }
@@ -54,6 +56,18 @@ public class App extends Application {
 
     }
 
+    private void initSounds() {
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        CommonVar.setAlarmSoundUri(Uri.parse(sp.getString(
+                CommonDef.PREF_KEY_URI_SOUND_ALARM, CommonDef.PREF_VAL_DEFAULT_URI_SOUND_ALARM)));
+        CommonVar.setInfoSoundUri(Uri.parse(sp.getString(
+                CommonDef.PREF_KEY_URI_SOUND_INFO, CommonDef.PREF_VAL_DEFAULT_URI_SOUND_INFO)));
+        CommonVar.setTickSoundUri(Uri.parse(sp.getString(
+                CommonDef.PREF_KEY_URI_SOUND_TICK, CommonDef.PREF_VAL_DEFAULT_URI_SOUND_TICK)));
+    }
+
     private void initAlarmDeviceList() {
         String[] projection = {
                 AppDb.AlarmDeviceTable.COLUMN_DEV_TEL,
@@ -67,5 +81,20 @@ public class App extends Application {
             AlarmDeviceList.put(new AlarmDevice(getApplicationContext(), cursor.getString(0)));
         }
         cursor.close();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (CommonDef.PREF_KEY_URI_SOUND_ALARM.equals(key) ||
+                CommonDef.PREF_KEY_URI_SOUND_INFO.equals(key) ||
+                CommonDef.PREF_KEY_URI_SOUND_TICK.equals(key)) {
+            initSounds();
+        } else if (CommonDef.PREF_KEY_MAX_HISTORY_RECORDS.equals(key)) {
+            String val = sharedPreferences.getString(key, String.valueOf(CommonDef.PREF_VAL_MAX_HISTORY_RECORDS));
+            if (TextUtils.isEmpty(val)) {
+                val = "0";
+            }
+            CommonVar.setMaxHistoryRecords(Integer.valueOf(val));
+        }
     }
 }

@@ -68,4 +68,47 @@
     <string name="text_view_app_firm">Integral, Ltd.</string>
     <string name="text_view_credits_title">Credits:</string>
 
+    <string name="MSG_DisarmFailure">Failed to disarm</string>
+    <string name="MSG_ArmFailure">Failed to arm</string>
+    <string name="MSG_Alarm">Alarm</string>
+    <string name="MSG_Armed">Armed</string>
+    <string name="MSG_Disarmed">Disarmed</string>
+    <string name="MSG_AlarmShort">Alarm, short</string>
+    <string name="MSG_AlarmTorn">Alarm, torn</string>
+    <string name="MSG_StateOk">State OK</string>
+    <string name="MSG_Short">Short</string>
+    <string name="MSG_Torn">Torn</string>
+    <string name="MSG_AutoArmed">Armed</string>
+    <string name="MSG_AutoDisarmed">Disarmed</string>
+    <string name="MSG_NoInfo">No info</string>
+    <string name="MSG_Burglary">Burglary</string>
+    <string name="MSG_Fault">Fault</string>
+    <string name="MSG_NoFault">No fault</string>
+    <string name="MSG_CaseOpened">Case opened</string>
+    <string name="MSG_BadAC">No power</string>
+    <string name="MSG_BadDC">Battery low</string>
+    <string name="MSG_GoodAC">Power OK</string>
+    <string name="MSG_GoodDC">Battery OK</string>
+    <string name="MSG_CaseClosed">Case closed</string>
+    <string name="MSG_Crash">Crash</string>
+    <string name="MSG_LinkOff">Link OFF</string>
+    <string name="MSG_LinkOn">Link ON</string>
+    <string name="MSG_SetProg">Programmed</string>
+    <string name="MSG_GrpAutoArmed">Armed</string>
+    <string name="MSG_GrpAutoDisarmed">Disarmed</string>
+    <string name="MSG_GrpShort">Short</string>
+    <string name="MSG_GrpTorn">Torn</string>
+    <string name="MSG_GrpStateOk">State OK</string>
+    <string name="MSG_Version">Version</string>
+    <string name="MSG_DeviceOn">Panel ON</string>
+    <string name="MSG_DeviceOff">Panel OFF</string>
+    <string name="MSG_Test">Test</string>
+    <string name="MSG_Balance">Balance</string>
+
+    <string name="CMD_GetState">Get state</string>
+    <string name="CMD_Arm">Arm</string>
+    <string name="CMD_Disarm">Disarm</string>
+
+    <string name="DEV_UserLetter">U</string>
+
 </resources>

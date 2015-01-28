@@ -7,16 +7,89 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by aledin on 26.01.15.
  */
 public class AlarmDevice implements Comparable {
+
+    private final static String PATTERN_USER                = "((\\s+(P|П)([0-9]{1,2})){0,1})";
+    private final static String PATTERN_ZONES               = "((:([0-9]{1,2}(,[0-9]{1,2}){0,15})){0,1})";
+
+    private final static String PATTERN_MSG_TREVOGA         = "(TREVOGA|ТРЕВОГА)" + PATTERN_ZONES; // z
+    private final static String PATTERN_MSG_PODBOR_KODA     = "(PODBOR\\s+KODA|ПОДБОР\\s+КОДА)";
+    private final static String PATTERN_MSG_NAPADENIE       = "(NAPADENIE|НАПАДЕНИЕ)" + PATTERN_USER; // u
+    private final static String PATTERN_MSG_VSKRIT          = "(VSKRIT|ВСКРЫТ)" + PATTERN_ZONES; // z
+    private final static String PATTERN_MSG_OTKLUCHENIE     = "(OTKLUCHENIE|ОТКЛЮЧЕНИЕ)";
+    private final static String PATTERN_MSG_ZAKRIT          = "(zakrit|закрыт)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_220_NET         = "220\\s+(NET|НЕТ)";
+    private final static String PATTERN_MSG_220_EST         = "220\\s+(est\\'|есть)";
+    private final static String PATTERN_MSG_BAT_NE_NORMA    = "(bat.NEnorma|бат.НЕнорма)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_BAT_NORMA       = "(bat.norma|бат.норма)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_NET_SVYAZI      = "(NET\\s+svyazi|НЕТ\\s+связи)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_EST_SVYAZ       = "(est\\'svyaz|есть\\s+связь)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_NORMA           = "(norma|норма)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_NE_NORMA        = "(NE\\s+norma|НЕ\\s+норма)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_NEISPRAVEN      = "(NEispraven|НЕисправен)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_OSHIBKA         = "(oshibka|ошибка)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_TEST            = "(test|тест)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_SNYAT           = "(snyat|снят)" + PATTERN_USER + PATTERN_ZONES; //u z
+    private final static String PATTERN_MSG_VZYAT           = "(vzyat|взят)" + PATTERN_USER + PATTERN_ZONES; //u z
+    private final static String PATTERN_MSG_BALANS          = "(Balans|Баланс):\\s+([0-9,\\.]+)\\s+(\\S+)";
+
+    private final static String PATTERN_SMS = "((" +
+            PATTERN_MSG_TREVOGA        + ")|(" +
+            PATTERN_MSG_PODBOR_KODA    + ")|(" +
+            PATTERN_MSG_NAPADENIE      + ")|(" +
+            PATTERN_MSG_VSKRIT         + ")|(" +
+            PATTERN_MSG_OTKLUCHENIE    + ")|(" +
+            PATTERN_MSG_ZAKRIT         + ")|(" +
+            PATTERN_MSG_220_NET        + ")|(" +
+            PATTERN_MSG_220_EST        + ")|(" +
+            PATTERN_MSG_BAT_NE_NORMA   + ")|(" +
+            PATTERN_MSG_BAT_NORMA      + ")|(" +
+            PATTERN_MSG_NET_SVYAZI     + ")|(" +
+            PATTERN_MSG_EST_SVYAZ      + ")|(" +
+            PATTERN_MSG_NORMA          + ")|(" +
+            PATTERN_MSG_NE_NORMA       + ")|(" +
+            PATTERN_MSG_NEISPRAVEN     + ")|(" +
+            PATTERN_MSG_OSHIBKA        + ")|(" +
+            PATTERN_MSG_TEST           + ")|(" +
+            PATTERN_MSG_SNYAT          + ")|(" +
+            PATTERN_MSG_VZYAT          + ")|(" +
+            PATTERN_MSG_BALANS         + "))";
+
+    private final static Pattern patternSms = Pattern.compile(PATTERN_SMS);
+
+    private final static Pattern patternMsgTrevoga       = Pattern.compile(PATTERN_MSG_TREVOGA);
+    private final static Pattern patternMsgPodborKoda    = Pattern.compile(PATTERN_MSG_PODBOR_KODA);
+    private final static Pattern patternMsgNapadenie     = Pattern.compile(PATTERN_MSG_NAPADENIE);
+    private final static Pattern patternMsgVskrit        = Pattern.compile(PATTERN_MSG_VSKRIT);
+    private final static Pattern patternMsgOtkluchenie   = Pattern.compile(PATTERN_MSG_OTKLUCHENIE);
+    private final static Pattern patternMsgZakrit        = Pattern.compile(PATTERN_MSG_ZAKRIT);
+    private final static Pattern patternMsg220Net        = Pattern.compile(PATTERN_MSG_220_NET);
+    private final static Pattern patternMsg220Est        = Pattern.compile(PATTERN_MSG_220_EST);
+    private final static Pattern patternMsgBatNeNorma    = Pattern.compile(PATTERN_MSG_BAT_NE_NORMA);
+    private final static Pattern patternMsgBatNorma      = Pattern.compile(PATTERN_MSG_BAT_NORMA);
+    private final static Pattern patternMsgNetSvyazi     = Pattern.compile(PATTERN_MSG_NET_SVYAZI);
+    private final static Pattern patternMsgEstSvyaz      = Pattern.compile(PATTERN_MSG_EST_SVYAZ);
+    private final static Pattern patternMsgNorma         = Pattern.compile(PATTERN_MSG_NORMA);
+    private final static Pattern patternMsgNeNorma       = Pattern.compile(PATTERN_MSG_NE_NORMA);
+    private final static Pattern patternMsgNeispraven    = Pattern.compile(PATTERN_MSG_NEISPRAVEN);
+    private final static Pattern patternMsgOshibka       = Pattern.compile(PATTERN_MSG_OSHIBKA);
+    private final static Pattern patternMsgTest          = Pattern.compile(PATTERN_MSG_TEST);
+    private final static Pattern patternMsgSnyat         = Pattern.compile(PATTERN_MSG_SNYAT);
+    private final static Pattern patternMsgVzyat         = Pattern.compile(PATTERN_MSG_VZYAT);
+    private final static Pattern patternMsgBalans        = Pattern.compile(PATTERN_MSG_BALANS);
+
 
     private final String devTel;
     private String devName;
@@ -411,8 +484,317 @@ public class AlarmDevice implements Comparable {
     }
 
 
+    private TreeSet<Integer> zonesFromString(String zones) {
+        TreeSet<Integer> res = new TreeSet<Integer>();
+        if (TextUtils.isEmpty(zones)) {
+            return res;
+        }
+        String[] zonesArr = zones.split(",");
+        for (String zone : zonesArr) {
+            try {
+                res.add(Integer.valueOf(zone));
+            } catch (Exception e) {
+                e.printStackTrace();;
+            }
+        }
+        return res;
+    }
+
     public void parseMessage(String text) {
-        putToEventHistory(text);
+
+        Matcher matcherSms = patternSms.matcher(text);
+
+        int cnt = 0;
+
+        while (matcherSms.find()) {
+
+            cnt++;
+
+            Matcher m;
+
+            AlarmDeviceZone alarmDeviceZone;
+            String info = "";
+            Uri sound = CommonVar.getTickSoundUri();
+            Integer type = null;
+            String userNumStr = null;
+            String zonesStr = null;
+
+            String msg = matcherSms.group();
+
+            if ((m = patternMsgTrevoga.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Alarm);
+                sound = CommonVar.getAlarmSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setZoneState(AlarmDeviceZone.ST_TORN);
+                    alarmDeviceZone.setIsFired(true);
+                }
+
+            } else if ((m = patternMsgPodborKoda.matcher(msg)).matches()) {
+                // TODO
+
+            } else if ((m = patternMsgNapadenie.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Burglary);
+                sound = CommonVar.getAlarmSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
+                userNumStr = m.group(7);
+
+            } else if ((m = patternMsgVskrit.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_CaseOpened);
+
+                int i = 0;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    i++;
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsTamperOpened(true);
+                }
+
+                if (i == 0) {
+                    setIsTamperOpened(true);
+                }
+
+                if (isInAlarm()) {
+                    sound = CommonVar.getAlarmSoundUri();
+                    type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
+
+                } else {
+                    sound = CommonVar.getInfoSoundUri();
+                    type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                }
+
+            } else if ((m = patternMsgOtkluchenie.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_DeviceOff);
+                sound = CommonVar.getInfoSoundUri();
+
+            } else if ((m = patternMsgZakrit.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_CaseClosed);
+
+                int i = 0;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    i++;
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsTamperOpened(false);
+                }
+
+                if (i == 0) {
+                    setIsTamperOpened(false);
+                }
+
+            } else if ((m = patternMsg220Net.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_BadAC);
+                sound = CommonVar.getInfoSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+
+                setIsPowerLost(true);
+
+            } else if ((m = patternMsg220Est.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_GoodAC);
+                setIsPowerLost(false);
+
+            } else if ((m = patternMsgBatNeNorma.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_BadDC);
+                sound = CommonVar.getInfoSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+
+                int i = 0;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    i++;
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsBatteryLow(true);
+                }
+
+                if (i == 0) {
+                    setIsBatteryLow(true);
+                }
+
+            } else if ((m = patternMsgBatNorma.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_GoodDC);
+
+                int i = 0;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    i++;
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsBatteryLow(false);
+                }
+
+                if (i == 0) {
+                    setIsBatteryLow(false);
+                }
+
+            } else if ((m = patternMsgNetSvyazi.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_LinkOff);
+                sound = CommonVar.getInfoSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsLinkLost(true);
+                }
+
+            } else if ((m = patternMsgEstSvyaz.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_LinkOn);
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsLinkLost(false);
+                }
+
+            } else if ((m = patternMsgNorma.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_StateOk);
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setZoneState(AlarmDeviceZone.ST_OK);
+                }
+
+            } else if ((m = patternMsgNeNorma.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Torn);
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setZoneState(AlarmDeviceZone.ST_TORN);
+                }
+
+            } else if ((m = patternMsgNeispraven.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Crash);
+                sound = CommonVar.getInfoSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+
+                int i = 0;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    i++;
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsZoneFailure(true);
+                }
+
+                if (i == 0) {
+                    setIsDevFailure(true);
+                }
+
+            } else if ((m = patternMsgOshibka.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Fault);
+                sound = CommonVar.getInfoSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+
+                int i = 0;
+
+                zonesStr = m.group(4);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    i++;
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsZoneFailure(true);
+                }
+
+                if (i == 0) {
+                    setIsDevFailure(true);
+                }
+
+            } else if ((m = patternMsgTest.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Test);
+
+            } else if ((m = patternMsgSnyat.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Disarmed);
+
+                userNumStr = m.group(5);
+
+                zonesStr = m.group(8);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setIsArmed(false);
+                    alarmDeviceZone.setIsFired(false);
+                }
+
+//                for (int i = 0; i < m.groupCount(); i++) {
+//                    Log.d("AAAA", "i = " + i + "; " + m.group(i));
+//                }
+
+            } else if ((m = patternMsgVzyat.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Armed);
+
+                userNumStr = m.group(5);
+
+                zonesStr = m.group(8);
+
+                for (int zoneNum : zonesFromString(zonesStr)) {
+                    alarmDeviceZone = getZoneByNumOrCreateNew(zoneNum);
+                    alarmDeviceZone.setZoneState(AlarmDeviceZone.ST_OK);
+                    alarmDeviceZone.setIsArmed(true);
+                    alarmDeviceZone.setIsFired(false);
+                }
+
+            } else if ((m = patternMsgBalans.matcher(msg)).matches()) {
+
+                info = getContext().getString(R.string.MSG_Balance) + ": " + m.group(2) + " " + m.group(3);
+
+            } else {
+
+                info = text;
+            }
+
+            if (!TextUtils.isEmpty(zonesStr)) {
+                info += (": " + zonesStr);
+            }
+
+            if (!TextUtils.isEmpty(userNumStr)) {
+                info += ("; " + getContext().getString(R.string.DEV_UserLetter) + userNumStr);
+            }
+
+            setLastEventText(info);
+            putToEventHistory(MiscFunc.now(), info, type);
+
+            //putToEventHistory("cnt: " + cnt + "; " + matcherSms.group());
+            // TODO: show notification
+        }
+        if (cnt == 0) {
+            putToEventHistory(text);
+        }
     }
 
 //    private void procData(Chat chat, Message message, PacketExtension packetExtension) {
