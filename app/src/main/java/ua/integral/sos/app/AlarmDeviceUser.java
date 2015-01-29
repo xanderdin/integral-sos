@@ -1,5 +1,5 @@
 package ua.integral.sos.app;
-
+/*
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -7,9 +7,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
-/**
+/ **
  * Created by aledin on 26.01.15.
- */
+ * /
 public class AlarmDeviceUser implements Comparable {
 
     private final long devId;
@@ -140,3 +140,4 @@ public class AlarmDeviceUser implements Comparable {
         return 0;
     }
 }
+*/

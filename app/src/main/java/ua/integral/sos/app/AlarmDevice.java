@@ -99,7 +99,7 @@ public class AlarmDevice implements Comparable {
 
     private final SortedSet<AlarmDeviceZone> zones = Collections.synchronizedSortedSet(new TreeSet<AlarmDeviceZone>());
 
-    private final SortedSet<AlarmDeviceUser> users = Collections.synchronizedSortedSet(new TreeSet<AlarmDeviceUser>());
+    //private final SortedSet<AlarmDeviceUser> users = Collections.synchronizedSortedSet(new TreeSet<AlarmDeviceUser>());
 
     private String lastEventText;
     private boolean isLastEventTextChanged;
@@ -123,7 +123,7 @@ public class AlarmDevice implements Comparable {
         this.devTel = devTel;
         tieWithDbRecord();
         loadZones();
-        loadUsers();
+        //loadUsers();
     }
 
     public AlarmDevice(Context context, String devTel, String devName) {
@@ -202,7 +202,7 @@ public class AlarmDevice implements Comparable {
         cursor.close();
     }
 
-
+    /*
     private void loadUsers() {
 
         for (AlarmDeviceUser user: users) {
@@ -228,7 +228,7 @@ public class AlarmDevice implements Comparable {
 
         cursor.close();
     }
-
+    */
 
     public void setDevName(String val) {
 
@@ -377,7 +377,7 @@ public class AlarmDevice implements Comparable {
         return zones;
     }
 
-
+    /*
     public synchronized SortedSet<AlarmDeviceUser> getUsers() {
         return users;
     }
@@ -391,7 +391,7 @@ public class AlarmDevice implements Comparable {
         }
         return null;
     }
-
+    */
 
     public boolean isInAlarm() {
 
@@ -433,11 +433,14 @@ public class AlarmDevice implements Comparable {
 
         //mainService.cancelNotification(getTel(), getNotificationId());
 
+        /*
         for (AlarmDeviceUser u : users) {
             u.clear();
         }
 
         users.clear();
+        */
+
         zones.clear();
         getListeners().clear();
         cancelNotification();
@@ -449,7 +452,7 @@ public class AlarmDevice implements Comparable {
         MiscProviderFunc.removeProviderRecord(getContext(), devUri);
     }
 
-
+    /*
     public synchronized void removeUser(int num) {
         for (Iterator i = getUsers().iterator(); i.hasNext();) {
             AlarmDeviceUser user = (AlarmDeviceUser) i.next();
@@ -460,7 +463,7 @@ public class AlarmDevice implements Comparable {
             }
         }
     }
-
+    */
 
     public synchronized void removeZone(int num) {
         for (Iterator i = getZones().iterator(); i.hasNext();) {

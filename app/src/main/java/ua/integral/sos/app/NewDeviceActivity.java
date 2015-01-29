@@ -105,12 +105,12 @@ public class NewDeviceActivity extends ActionBarActivity {
 
             buttonAdd.setEnabled(false);
 
-            String gid = editTel.getText().toString().trim();
+            String tel = editTel.getText().toString().trim();
 
-            if (gid.length() < CommonDef.TEL_MIN_LENGTH)
+            if (tel.length() < CommonDef.TEL_MIN_LENGTH)
                 return;
 
-            if (!MiscFunc.isTelOk(gid)) {
+            if (!MiscFunc.isTelOk(tel)) {
                 editTel.setError(getString(R.string.err_bad_value));
                 return;
             } else {

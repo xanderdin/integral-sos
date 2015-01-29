@@ -29,7 +29,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
     private final static int LOADER_ID_ZONES = 2;
     private final static int LOADER_ID_HISTORY = 3;
-    private final static int LOADER_ID_USERS = 4;
+    //private final static int LOADER_ID_USERS = 4;
 
     private AlarmDevice alarmDevice;
 
@@ -52,8 +52,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
     private ListView listHistory;
     private SimpleCursorAdapter historyListAdapter;
 
-    private ListView listUsers;
-    private SimpleCursorAdapter userListAdapter;
+    //private ListView listUsers;
+    //private SimpleCursorAdapter userListAdapter;
 
     private long devId;
 
@@ -125,6 +125,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         historyListAdapter.setViewBinder(historyListViewBinder);
 
+        /*
         String usersFrom[] = {
                 AppDb.AlarmDeviceUserTable.COLUMN_USER_NUM,
                 AppDb.AlarmDeviceUserTable.COLUMN_USER_NAME,
@@ -144,6 +145,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
                 0);
 
         userListAdapter.setViewBinder(userListViewBinder);
+        */
 
         // tabs
         tabHost = (TabHost) findViewById(R.id.tabHost);
@@ -164,14 +166,16 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         tabHost.addTab(tabSpec);
 
+        /*
         tabSpec = tabHost.newTabSpec("tab_users");
         setTabSpecIndicator(tabHost, tabSpec, R.string.tab_device_users);
         tabSpec.setContent(R.id.tab_device_users);
 
         tabHost.addTab(tabSpec);
+        */
 
         tabHost.setCurrentTab(CommonVar.getDeviceDetailSelectedTabIdx());
-
+        //tabHost.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE); // FIXME: add users or remove tab
 
         gridZones = (GridView) findViewById(R.id.zone_list);
         gridZones.setEmptyView(findViewById(R.id.zone_list_empty));
@@ -180,10 +184,11 @@ public class DeviceDetailActivity extends AbstractAppActivity
         listHistory = (ListView) findViewById(R.id.history_list);
         listHistory.setEmptyView(findViewById(R.id.history_list_empty));
 
+        /*
         listUsers = (ListView) findViewById(R.id.user_list);
         listUsers.setEmptyView(findViewById(R.id.user_list_empty));
         listUsers.setOnItemClickListener(this);
-
+        */
 
         alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(getDevId());
 
@@ -197,13 +202,13 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         listHistory.setAdapter(historyListAdapter);
 
-        listUsers.setAdapter(userListAdapter);
+        //listUsers.setAdapter(userListAdapter);
 
         initLoaders();
 
         registerForContextMenu(findViewById(R.id.layout_device_header));
         registerForContextMenu(gridZones);
-        registerForContextMenu(listUsers);
+        //registerForContextMenu(listUsers);
 
         setViewReady(true);
         refreshData();
@@ -249,7 +254,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
     private void initLoaders() {
         getSupportLoaderManager().initLoader(LOADER_ID_ZONES, null, this);
         getSupportLoaderManager().initLoader(LOADER_ID_HISTORY, null, this);
-        getSupportLoaderManager().initLoader(LOADER_ID_USERS, null, this);
+        //getSupportLoaderManager().initLoader(LOADER_ID_USERS, null, this);
     }
 
     private void notifyDeviceChanged() {
@@ -380,12 +385,14 @@ public class DeviceDetailActivity extends AbstractAppActivity
                     }
                     removeZone(alarmDeviceZone);
                     return true;
+                /*
                 case R.id.action_user_edit:
                     editUser(info.id);
                     return true;
                 case R.id.action_user_remove:
                     removeUser(info.id);
                     return true;
+                */
             }
         }
 
@@ -465,6 +472,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
                 break;
 
+            /*
             case LOADER_ID_USERS:
 
                 projection = new String[] {
@@ -485,6 +493,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
                         projection, selection, selectionArgs, sortOrder);
 
                 break;
+             */
         }
 
         return cursorLoader;
@@ -500,9 +509,11 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case LOADER_ID_HISTORY:
                 historyListAdapter.swapCursor(data);
                 break;
+            /*
             case LOADER_ID_USERS:
                 userListAdapter.swapCursor(data);
                 break;
+            */
         }
     }
 
@@ -516,9 +527,11 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case LOADER_ID_HISTORY:
                 historyListAdapter.swapCursor(null);
                 break;
+            /*
             case LOADER_ID_USERS:
                 userListAdapter.swapCursor(null);
                 break;
+            */
         }
     }
 
@@ -692,7 +705,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 
-            AlarmDeviceUser alarmDeviceUser;
+            //AlarmDeviceUser alarmDeviceUser;
 
             switch (view.getId()) {
 
@@ -836,7 +849,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         zoneListAdapter.notifyDataSetChanged();
         historyListAdapter.notifyDataSetChanged();
-        userListAdapter.notifyDataSetChanged();
+        //userListAdapter.notifyDataSetChanged();
     }
 
     private void editZone(final int num) {
@@ -908,6 +921,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
         }
     }
 
+    /*
     private void removeUser(final long rowId) {
 
         final AlarmDeviceUser alarmDeviceUser = getAlarmDevice().getUserByRowId(rowId);
@@ -992,6 +1006,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
         setDialog(d);
         getDialog().show();
     }
+    */
 
     @Override
     public void onDataChanged() {

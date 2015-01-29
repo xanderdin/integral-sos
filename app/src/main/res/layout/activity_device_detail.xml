@@ -170,6 +170,7 @@
 
                     </LinearLayout>
 
+                    <!--
                     <LinearLayout
                         android:id="@+id/tab_device_users"
                         android:orientation="vertical"
@@ -184,6 +185,7 @@
                         <include layout="@layout/include_empty_user_list"/>
 
                     </LinearLayout>
+                    -->
 
                 </FrameLayout>
 

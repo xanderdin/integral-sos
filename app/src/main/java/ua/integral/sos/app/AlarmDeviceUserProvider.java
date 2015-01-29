@@ -1,5 +1,5 @@
 package ua.integral.sos.app;
-
+/*
 import android.content.*;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -10,9 +10,9 @@ import android.text.TextUtils;
 
 import java.util.HashMap;
 
-/**
+/ **
  * Created by aledin on 26.01.15.
- */
+ * /
 public class AlarmDeviceUserProvider extends ContentProvider {
 
     private final static String AUTHORITY = AlarmDeviceUserProvider.class.getName();
@@ -202,3 +202,4 @@ public class AlarmDeviceUserProvider extends ContentProvider {
         return cnt;
     }
 }
+*/

@@ -91,7 +91,7 @@ public class AppDb extends SQLiteOpenHelper {
         };
     }
 
-
+    /*
     // AlarmDeviceUser table contract
     public final static class AlarmDeviceUserTable implements BaseColumns {
 
@@ -116,7 +116,7 @@ public class AppDb extends SQLiteOpenHelper {
                 COLUMN_TO_DELETE,
         };
     }
-
+    */
 
     // History table contract
     public final static class EventHistoryTable implements BaseColumns {
@@ -166,9 +166,9 @@ public class AppDb extends SQLiteOpenHelper {
             " DELETE FROM "        + AlarmDeviceZoneTable.TABLE_NAME +
             " WHERE "              + AlarmDeviceZoneTable.COLUMN_DEV_ID +
             " = OLD."              + AlarmDeviceTable.COLUMN_ID + ";" +
-            " DELETE FROM "        + AlarmDeviceUserTable.TABLE_NAME +
-            " WHERE "              + AlarmDeviceUserTable.COLUMN_DEV_ID +
-            " = OLD."              + AlarmDeviceTable.COLUMN_ID + ";" +
+            //" DELETE FROM "        + AlarmDeviceUserTable.TABLE_NAME +
+            //" WHERE "              + AlarmDeviceUserTable.COLUMN_DEV_ID +
+            //" = OLD."              + AlarmDeviceTable.COLUMN_ID + ";" +
             " DELETE FROM "        + EventHistoryTable.TABLE_NAME +
             " WHERE "              + EventHistoryTable.COLUMN_DEV_ID +
             " = OLD."              + AlarmDeviceTable.COLUMN_ID + ";" +
@@ -198,7 +198,7 @@ public class AppDb extends SQLiteOpenHelper {
             AlarmDeviceZoneTable.COLUMN_DEV_ID        + ", " +
             AlarmDeviceZoneTable.COLUMN_ZONE_NUM      + ");";
 
-
+    /*
     private final static String ALARM_DEVICE_USER_TABLE_CREATE = "CREATE TABLE " +
             AlarmDeviceUserTable.TABLE_NAME             + " (" +
             AlarmDeviceUserTable.COLUMN_ID              + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -214,7 +214,7 @@ public class AppDb extends SQLiteOpenHelper {
             AlarmDeviceUserTable.TABLE_NAME           + " (" +
             AlarmDeviceUserTable.COLUMN_DEV_ID        + ", " +
             AlarmDeviceUserTable.COLUMN_USER_NUM      + ");";
-
+    */
 
     private final static String EVENT_HISTORY_TABLE_CREATE = "CREATE TABLE " +
             EventHistoryTable.TABLE_NAME          + " (" +
@@ -236,8 +236,8 @@ public class AppDb extends SQLiteOpenHelper {
         db.execSQL(ALARM_DEVICE_TABLE_CREATE);
         db.execSQL(ALARM_DEVICE_ZONE_TABLE_CREATE);
         db.execSQL(ALARM_DEVICE_ZONE_TABLE_INDEX_01_CREATE);
-        db.execSQL(ALARM_DEVICE_USER_TABLE_CREATE);
-        db.execSQL(ALARM_DEVICE_USER_TABLE_INDEX_01_CREATE);
+        //db.execSQL(ALARM_DEVICE_USER_TABLE_CREATE);
+        //db.execSQL(ALARM_DEVICE_USER_TABLE_INDEX_01_CREATE);
         db.execSQL(EVENT_HISTORY_TABLE_CREATE);
         db.execSQL(ALARM_DEVICE_TABLE_AFTER_DELETE_TRIGGER_CREATE);
     }
