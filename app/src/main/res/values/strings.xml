@@ -105,10 +105,6 @@
     <string name="MSG_Test">Test</string>
     <string name="MSG_Balance">Balance</string>
 
-    <string name="CMD_GetState">Get state</string>
-    <string name="CMD_Arm">Arm</string>
-    <string name="CMD_Disarm">Disarm</string>
-
     <string name="DEV_UserLetter">U</string>
 
 </resources>

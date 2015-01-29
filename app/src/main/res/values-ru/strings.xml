@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Интеграл SOS</string>
+
+    <string name="hello_world">Привет, Мир!</string>
+
+    <string name="empty">Пусто</string>
+    <string name="processing">Выполняется...</string>
+
+    <string name="action_add_device">Добавить прибор</string>
+    <string name="action_settings">Настройки</string>
+    <string name="action_edit">Изменить</string>
+    <string name="action_remove">Удалить</string>
+    <string name="action_user_edit">Изменить</string>
+
+    <string name="edit_tel">Номер телефона</string>
+    <string name="edit_name">Название</string>
+    <string name="edit_device_custom_name">Название объекта</string>
+    <string name="edit_zone_custom_name">Название зоны</string>
+    <string name="edit_user_name">Имя пользователя</string>
+
+    <string name="button_add">Добавить</string>
+
+    <string name="err_must_be_filled">Нужно заполнить</string>
+    <string name="err_bad_value">Недопустимое значение</string>
+    <string name="err_too_short">Слишком коротко</string>
+
+    <string name="dialog_remove_title">Удалить выбранный прибор?</string>
+    <string name="dialog_remove_message">Все данные прибора будут удалены!</string>
+    <string name="dialog_remove_zone_message">Удалить?</string>
+    <string name="dialog_remove_user_message">Удалить?</string>
+    <string name="dialog_device_edit_title">Данные прибора</string>
+    <string name="dialog_zone_edit_title">Данные зоны</string>
+    <string name="dialog_user_edit_title">Данные пользователя</string>
+
+    <string name="title_activity_main">Приборы</string>
+    <string name="title_activity_new_device">Новый прибор</string>
+    <string name="title_activity_device_detail">Прибор</string>
+    <string name="title_activity_settings">Настройки</string>
+
+    <string name="tab_device_zones">Зоны</string>
+    <string name="tab_device_history">История</string>
+    <string name="tab_device_users">Люди</string>
+    <string name="tab_sound_supplied">Базовые</string>
+    <string name="tab_sound_internal">Телефон</string>
+    <string name="tab_sound_external">Внешние</string>
+
+    <string name="msg_device_must_be_disarmed">Сначала надо снять прибор с охраны</string>
+
+    <string name="pref_device_title">Приборы</string>
+    <string name="pref_max_history_records_title">Длина истории</string>
+    <string name="pref_sound_settings_title">Звуки</string>
+    <string name="pref_uri_sound_alarm_title">Тревога</string>
+    <string name="pref_uri_sound_info_title">Уведомление</string>
+    <string name="pref_uri_sound_tick_title">Сообщение</string>
+    <string name="pref_misc_title">Разное</string>
+    <string name="pref_about_app_title">О приложении</string>
+
+    <string name="text_view_sound_selected_label">Выбрано:</string>
+    <string name="text_view_sound_selected_title">Ничего</string>
+    <string name="text_view_zone_link_status">Статус связи</string>
+    <string name="text_view_zone_battery_status">Статус батареи</string>
+    <string name="text_view_zone_tamper_status">Статус тампера</string>
+    <string name="text_view_zone_failure_status">Наличие сбоя</string>
+    <string name="text_view_zone_no_info">Нет информации</string>
+    <string name="text_view_app_author">Александр Правдин</string>
+    <string name="text_view_app_firm">ПКБ Интеграл</string>
+    <string name="text_view_credits_title">Благодарности:</string>
+
+    <string name="MSG_DisarmFailure">Снять не удалось</string>
+    <string name="MSG_ArmFailure">Взять не удалось</string>
+    <string name="MSG_Alarm">Тревога</string>
+    <string name="MSG_Armed">Взято</string>
+    <string name="MSG_Disarmed">Снято</string>
+    <string name="MSG_AlarmShort">Тревога, замыкание</string>
+    <string name="MSG_AlarmTorn">Тревога, обрыв</string>
+    <string name="MSG_StateOk">Состояние OK</string>
+    <string name="MSG_Short">Замыкание</string>
+    <string name="MSG_Torn">Обрыв</string>
+    <string name="MSG_AutoArmed">Взято</string>
+    <string name="MSG_AutoDisarmed">Снято</string>
+    <string name="MSG_NoInfo">Нет информации</string>
+    <string name="MSG_Burglary">Нападение</string>
+    <string name="MSG_Fault">Сбой</string>
+    <string name="MSG_NoFault">Сбой отсутствует</string>
+    <string name="MSG_CaseOpened">Корпус открыт</string>
+    <string name="MSG_BadAC">Нет питания</string>
+    <string name="MSG_BadDC">Батарея разряжена</string>
+    <string name="MSG_GoodAC">Питание OK</string>
+    <string name="MSG_GoodDC">Батарея OK</string>
+    <string name="MSG_CaseClosed">Корпус закрыт</string>
+    <string name="MSG_Crash">Серьезный сбой</string>
+    <string name="MSG_LinkOff">Связь нарушена</string>
+    <string name="MSG_LinkOn">Связь в норме</string>
+    <string name="MSG_SetProg">Запрограммирован</string>
+    <string name="MSG_GrpAutoArmed">Взято</string>
+    <string name="MSG_GrpAutoDisarmed">Снято</string>
+    <string name="MSG_GrpShort">Замыкание</string>
+    <string name="MSG_GrpTorn">Обрыв</string>
+    <string name="MSG_GrpStateOk">Состояние OK</string>
+    <string name="MSG_Version">Версия</string>
+    <string name="MSG_DeviceOn">Прибор включен</string>
+    <string name="MSG_DeviceOff">Прибор выключен</string>
+    <string name="MSG_Test">Тест</string>
+    <string name="MSG_Balance">Баланс</string>
+
+    <string name="DEV_UserLetter">П</string>
+
+</resources>
