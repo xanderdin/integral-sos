@@ -15,7 +15,8 @@ import android.widget.*;
 
 public class MainActivity extends AbstractAppActivity
         implements ListView.OnItemClickListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AlarmDevice.AlarmDeviceListener {
 
     private final static int LOADER_ID_DEVICES = 1;
 
@@ -152,9 +153,20 @@ public class MainActivity extends AbstractAppActivity
     }
 
     @Override
+    protected void onPause() {
+        for (AlarmDevice alarmDevice: AlarmDeviceList.getList().values()) {
+            alarmDevice.removeListener(this);
+        }
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         notifyDeviceListAdapterChanged();
+        for (AlarmDevice alarmDevice: AlarmDeviceList.getList().values()) {
+            alarmDevice.addListener(this);
+        }
     }
 
     public void onClick(View v) {
@@ -183,9 +195,7 @@ public class MainActivity extends AbstractAppActivity
             return;
         }
 
-//        if (null != getMainService()) {
-//            getMainService().cancelNotification(alarmDevice.getGid(), alarmDevice.getNotificationId());
-//        }
+        alarmDevice.cancelNotification();
 
         Intent intent = new Intent(this, DeviceDetailActivity.class);
         intent.putExtra(CommonDef.EXTRA_SELECTED_ID, alarmDevice.getRowId());
@@ -308,4 +318,9 @@ public class MainActivity extends AbstractAppActivity
             return false;
         }
     };
+
+    @Override
+    public void onDataChanged() {
+        refreshData();
+    }
 }

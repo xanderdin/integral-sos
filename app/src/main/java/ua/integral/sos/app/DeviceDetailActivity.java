@@ -24,7 +24,8 @@ import java.util.Date;
 
 public class DeviceDetailActivity extends AbstractAppActivity
         implements ListView.OnItemClickListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AlarmDevice.AlarmDeviceListener {
 
     private final static int LOADER_ID_ZONES = 2;
     private final static int LOADER_ID_HISTORY = 3;
@@ -266,6 +267,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
 //        if (null != getMainService()) {
 //            getMainService().cancelNotification(getAlarmDevice().getGid(), getAlarmDevice().getNotificationId());
 //        }
+        alarmDevice.cancelNotification();
+        alarmDevice.removeListener(this);
         super.onPause();
     }
 
@@ -273,6 +276,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
     protected void onResume() {
         super.onResume();
         notifyDeviceChanged();
+        alarmDevice.addListener(this);
     }
 
     @Override
@@ -987,5 +991,10 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         setDialog(d);
         getDialog().show();
+    }
+
+    @Override
+    public void onDataChanged() {
+        notifyDeviceChanged();
     }
 }

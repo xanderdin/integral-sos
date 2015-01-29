@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.widget.Toast;
 
 public class SmsReceiver extends BroadcastReceiver {
 
@@ -42,7 +41,6 @@ public class SmsReceiver extends BroadcastReceiver {
             String body = stringBuilder.toString();
             for (AlarmDevice alarmDevice : AlarmDeviceList.getList().values()) {
                 if (PhoneNumberUtils.compare(context, tel, alarmDevice.getTel())) {
-                    Toast.makeText(context, "From: " + alarmDevice.getDevName() + ": " + body, Toast.LENGTH_LONG).show();
                     alarmDevice.parseMessage(body);
                     abortBroadcast();
                     break;

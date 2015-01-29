@@ -1,18 +1,16 @@
 package ua.integral.sos.app;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +33,7 @@ public class AlarmDevice implements Comparable {
     private final static String PATTERN_MSG_BAT_NE_NORMA    = "(bat.NEnorma|бат.НЕнорма)" + PATTERN_ZONES; //z
     private final static String PATTERN_MSG_BAT_NORMA       = "(bat.norma|бат.норма)" + PATTERN_ZONES; //z
     private final static String PATTERN_MSG_NET_SVYAZI      = "(NET\\s+svyazi|НЕТ\\s+связи)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_EST_SVYAZ       = "(est\\'svyaz|есть\\s+связь)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_EST_SVYAZ       = "(est\\'\\s+svyaz|есть\\s+связь)" + PATTERN_ZONES; //z
     private final static String PATTERN_MSG_NORMA           = "(norma|норма)" + PATTERN_ZONES; //z
     private final static String PATTERN_MSG_NE_NORMA        = "(NE\\s+norma|НЕ\\s+норма)" + PATTERN_ZONES; //z
     private final static String PATTERN_MSG_NEISPRAVEN      = "(NEispraven|НЕисправен)" + PATTERN_ZONES; //z
@@ -112,6 +110,13 @@ public class AlarmDevice implements Comparable {
     private long rowId;
 
     private final Context context;
+
+    public interface AlarmDeviceListener {
+        public void onDataChanged();
+    }
+
+    private final ArrayList<AlarmDeviceListener> listeners = new ArrayList<AlarmDeviceListener>();
+
 
     public AlarmDevice(Context context, String devTel) {
         this.context = context;
@@ -233,6 +238,8 @@ public class AlarmDevice implements Comparable {
 
         setProviderStringValue(AppDb.AlarmDeviceTable.COLUMN_DEV_NAME, val);
         devName = val;
+
+        notifyDataChanged();
     }
 
 
@@ -250,6 +257,7 @@ public class AlarmDevice implements Comparable {
     private void setLastEventText(String text) {
         lastEventText = text;
         isLastEventTextChanged = true;
+        notifyDataChanged();
     }
 
 
@@ -431,6 +439,8 @@ public class AlarmDevice implements Comparable {
 
         users.clear();
         zones.clear();
+        getListeners().clear();
+        cancelNotification();
     }
 
 
@@ -513,7 +523,8 @@ public class AlarmDevice implements Comparable {
             Matcher m;
 
             AlarmDeviceZone alarmDeviceZone;
-            String info = "";
+            //String infoSb = "";
+            StringBuilder infoSb = new StringBuilder();
             Uri sound = CommonVar.getTickSoundUri();
             Integer type = null;
             String userNumStr = null;
@@ -523,7 +534,7 @@ public class AlarmDevice implements Comparable {
 
             if ((m = patternMsgTrevoga.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Alarm);
+                infoSb.append(getContext().getString(R.string.MSG_Alarm));
                 sound = CommonVar.getAlarmSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
 
@@ -540,14 +551,14 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgNapadenie.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Burglary);
+                infoSb.append(getContext().getString(R.string.MSG_Burglary));
                 sound = CommonVar.getAlarmSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
                 userNumStr = m.group(7);
 
             } else if ((m = patternMsgVskrit.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_CaseOpened);
+                infoSb.append(getContext().getString(R.string.MSG_CaseOpened));
 
                 int i = 0;
 
@@ -574,12 +585,12 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgOtkluchenie.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_DeviceOff);
+                infoSb.append(getContext().getString(R.string.MSG_DeviceOff));
                 sound = CommonVar.getInfoSoundUri();
 
             } else if ((m = patternMsgZakrit.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_CaseClosed);
+                infoSb.append(getContext().getString(R.string.MSG_CaseClosed));
 
                 int i = 0;
 
@@ -597,7 +608,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsg220Net.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_BadAC);
+                infoSb.append(getContext().getString(R.string.MSG_BadAC));
                 sound = CommonVar.getInfoSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
@@ -605,12 +616,12 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsg220Est.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_GoodAC);
+                infoSb.append(getContext().getString(R.string.MSG_GoodAC));
                 setIsPowerLost(false);
 
             } else if ((m = patternMsgBatNeNorma.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_BadDC);
+                infoSb.append(getContext().getString(R.string.MSG_BadDC));
                 sound = CommonVar.getInfoSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
@@ -630,7 +641,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgBatNorma.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_GoodDC);
+                infoSb.append(getContext().getString(R.string.MSG_GoodDC));
 
                 int i = 0;
 
@@ -648,7 +659,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgNetSvyazi.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_LinkOff);
+                infoSb.append(getContext().getString(R.string.MSG_LinkOff));
                 sound = CommonVar.getInfoSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
@@ -661,7 +672,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgEstSvyaz.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_LinkOn);
+                infoSb.append(getContext().getString(R.string.MSG_LinkOn));
 
                 zonesStr = m.group(4);
 
@@ -672,7 +683,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgNorma.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_StateOk);
+                infoSb.append(getContext().getString(R.string.MSG_StateOk));
 
                 zonesStr = m.group(4);
 
@@ -683,7 +694,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgNeNorma.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Torn);
+                infoSb.append(getContext().getString(R.string.MSG_Torn));
 
                 zonesStr = m.group(4);
 
@@ -694,7 +705,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgNeispraven.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Crash);
+                infoSb.append(getContext().getString(R.string.MSG_Crash));
                 sound = CommonVar.getInfoSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
@@ -714,7 +725,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgOshibka.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Fault);
+                infoSb.append(getContext().getString(R.string.MSG_Fault));
                 sound = CommonVar.getInfoSoundUri();
                 type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
@@ -734,11 +745,11 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgTest.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Test);
+                infoSb.append(getContext().getString(R.string.MSG_Test));
 
             } else if ((m = patternMsgSnyat.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Disarmed);
+                infoSb.append(getContext().getString(R.string.MSG_Disarmed));
 
                 userNumStr = m.group(5);
 
@@ -756,7 +767,7 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgVzyat.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Armed);
+                infoSb.append(getContext().getString(R.string.MSG_Armed));
 
                 userNumStr = m.group(5);
 
@@ -771,30 +782,70 @@ public class AlarmDevice implements Comparable {
 
             } else if ((m = patternMsgBalans.matcher(msg)).matches()) {
 
-                info = getContext().getString(R.string.MSG_Balance) + ": " + m.group(2) + " " + m.group(3);
+                infoSb.append(getContext().getString(R.string.MSG_Balance)).append(": ").append(m.group(2)).append(" ").append(m.group(3));
 
             } else {
-
-                info = text;
+                infoSb.append(text);
             }
 
             if (!TextUtils.isEmpty(zonesStr)) {
-                info += (": " + zonesStr);
+                infoSb.append(": ").append(zonesStr);
             }
 
             if (!TextUtils.isEmpty(userNumStr)) {
-                info += ("; " + getContext().getString(R.string.DEV_UserLetter) + userNumStr);
+                infoSb.append("; ").append(getContext().getString(R.string.DEV_UserLetter)).append(userNumStr);
             }
 
+            String info = infoSb.toString();
+            long time = MiscFunc.now();
             setLastEventText(info);
-            putToEventHistory(MiscFunc.now(), info, type);
-
-            //putToEventHistory("cnt: " + cnt + "; " + matcherSms.group());
-            // TODO: show notification
+            putToEventHistory(time, info, type);
+            showNotification(time, info, sound);
         }
         if (cnt == 0) {
             putToEventHistory(text);
         }
+    }
+
+
+    private void showNotification(long time, String text, Uri sound) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
+
+        if (isInAlarm()) {
+            builder.setSmallIcon(R.drawable.ic_stat_lock_broken);
+            builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+        } else {
+            builder.setSmallIcon(R.drawable.ic_stat_communication_message);
+            builder.setDefaults(Notification.DEFAULT_LIGHTS);
+        }
+        builder.setContentTitle(getDevName());
+        builder.setContentText(text);
+        builder.setTicker(getDevName() + ": " + text);
+        //builder.setDefaults(Notification.DEFAULT_ALL);
+        //builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+        builder.setAutoCancel(true);
+        //builder.setOnlyAlertOnce(true);
+        builder.setSound(sound);
+        builder.setWhen(time * 1000);
+
+        Intent intent = new Intent(getContext(), DeviceDetailActivity.class);
+        intent.setAction(getContext().getPackageName() + "." + getTel()); // MAGIC!!! Without it extras won't be processed by activity!
+        intent.putExtra(CommonDef.EXTRA_SELECTED_ID, getRowId());
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setContentIntent(pendingIntent);
+
+        getNotificationManager().notify(getTel(), getNotificationId(), builder.build());
+
+    }
+
+    public void cancelNotification() {
+        getNotificationManager().cancel(getTel(), getNotificationId());
+    }
+
+    private synchronized NotificationManager getNotificationManager() {
+        return (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
 //    private void procData(Chat chat, Message message, PacketExtension packetExtension) {
@@ -837,6 +888,26 @@ public class AlarmDevice implements Comparable {
 
     public synchronized String getTextForAlertDialog() {
         return textForAlertDialog;
+    }
+
+    private synchronized ArrayList<AlarmDeviceListener> getListeners() {
+        return listeners;
+    }
+
+    public void addListener(AlarmDeviceListener l) {
+        if (!getListeners().contains(l)) {
+            getListeners().add(l);
+        }
+    }
+
+    public void removeListener(AlarmDeviceListener l) {
+        getListeners().remove(l);
+    }
+
+    private void notifyDataChanged() {
+        for (AlarmDeviceListener l : getListeners()) {
+            l.onDataChanged();
+        }
     }
 
 
