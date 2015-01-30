@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -121,6 +122,9 @@ public class AbstractAppActivity extends ActionBarActivity
             // not from a list
         } else {
             switch (item.getItemId()) {
+                case R.id.action_call:
+                    callDevice(info.id);
+                    return true;
                 case R.id.action_edit:
                     editDevice(info.id);
                     return true;
@@ -146,6 +150,16 @@ public class AbstractAppActivity extends ActionBarActivity
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    protected void callDevice(final long rowId) {
+        final AlarmDevice alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(rowId);
+        if (null == alarmDevice) {
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + alarmDevice.getTel()));
+        startActivity(intent);
     }
 
     protected void editDevice(final long rowId) {

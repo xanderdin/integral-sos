@@ -22,26 +22,26 @@ public class AlarmDevice implements Comparable {
     private final static String PATTERN_USER                = "((\\s+(P|П)([0-9]{1,2})){0,1})";
     private final static String PATTERN_ZONES               = "((:([0-9]{1,2}(,[0-9]{1,2}){0,15})){0,1})";
 
-    private final static String PATTERN_MSG_TREVOGA         = "(TREVOGA|ТРЕВОГА)" + PATTERN_ZONES; // z
+    private final static String PATTERN_MSG_TREVOGA         = "(TREVOGA|ТРЕВОГА)" + PATTERN_ZONES;
     private final static String PATTERN_MSG_PODBOR_KODA     = "(PODBOR\\s+KODA|ПОДБОР\\s+КОДА)";
-    private final static String PATTERN_MSG_NAPADENIE       = "(NAPADENIE|НАПАДЕНИЕ)" + PATTERN_USER; // u
-    private final static String PATTERN_MSG_VSKRIT          = "(VSKRIT|ВСКРЫТ)" + PATTERN_ZONES; // z
+    private final static String PATTERN_MSG_NAPADENIE       = "(NAPADENIE|НАПАДЕНИЕ)" + PATTERN_USER;
+    private final static String PATTERN_MSG_VSKRIT          = "(VSKRIT|ВСКРЫТ)" + PATTERN_ZONES;
     private final static String PATTERN_MSG_OTKLUCHENIE     = "(OTKLUCHENIE|ОТКЛЮЧЕНИЕ)";
-    private final static String PATTERN_MSG_ZAKRIT          = "(zakrit|закрыт)" + PATTERN_ZONES; //z
+    private final static String PATTERN_MSG_ZAKRIT          = "(zakrit|закрыт)" + PATTERN_ZONES;
     private final static String PATTERN_MSG_220_NET         = "220\\s+(NET|НЕТ)";
     private final static String PATTERN_MSG_220_EST         = "220\\s+(est\\'|есть)";
-    private final static String PATTERN_MSG_BAT_NE_NORMA    = "(bat.NEnorma|бат.НЕнорма)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_BAT_NORMA       = "(bat.norma|бат.норма)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_NET_SVYAZI      = "(NET\\s+svyazi|НЕТ\\s+связи)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_EST_SVYAZ       = "(est\\'\\s+svyaz|есть\\s+связь)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_NORMA           = "(norma|норма)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_NE_NORMA        = "(NE\\s+norma|НЕ\\s+норма)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_NEISPRAVEN      = "(NEispraven|НЕисправен)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_OSHIBKA         = "(oshibka|ошибка)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_TEST            = "(test|тест)" + PATTERN_ZONES; //z
-    private final static String PATTERN_MSG_SNYAT           = "(snyat|снят)" + PATTERN_USER + PATTERN_ZONES; //u z
-    private final static String PATTERN_MSG_VZYAT           = "(vzyat|взят)" + PATTERN_USER + PATTERN_ZONES; //u z
-    private final static String PATTERN_MSG_BALANS          = "(Balans|Баланс):\\s+([0-9,\\.]+)\\s+(\\S+)";
+    private final static String PATTERN_MSG_BAT_NE_NORMA    = "(bat.NEnorma|бат.НЕнорма)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_BAT_NORMA       = "(bat.norma|бат.норма)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_NET_SVYAZI      = "(NET\\s+svyazi|НЕТ\\s+связи)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_EST_SVYAZ       = "(est\\'\\s+svyaz|есть\\s+связь)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_NORMA           = "(norma|норма)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_NE_NORMA        = "(NE\\s+norma|НЕ\\s+норма)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_NEISPRAVEN      = "(NEispraven|НЕисправен)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_OSHIBKA         = "(oshibka|ошибка)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_TEST            = "(test|тест)" + PATTERN_ZONES;
+    private final static String PATTERN_MSG_SNYAT           = "(snyat|снят)" + PATTERN_USER + PATTERN_ZONES;
+    private final static String PATTERN_MSG_VZYAT           = "(vzyat|взят)" + PATTERN_USER + PATTERN_ZONES;
+    private final static String PATTERN_MSG_BALANS          = "(Balans|Баланс):\\s+([0-9,\\.]+)\\s*(\\S+)";
 
     private final static String PATTERN_SMS = "((" +
             PATTERN_MSG_TREVOGA        + ")|(" +

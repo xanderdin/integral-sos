@@ -13,6 +13,7 @@
     <string name="action_edit">Edit</string>
     <string name="action_remove">Remove</string>
     <string name="action_user_edit">Edit</string>
+    <string name="action_call">Call</string>
 
     <string name="edit_tel">Phone number</string>
     <string name="edit_name">Panel name</string>

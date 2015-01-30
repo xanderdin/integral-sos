@@ -13,6 +13,7 @@
     <string name="action_edit">Изменить</string>
     <string name="action_remove">Удалить</string>
     <string name="action_user_edit">Изменить</string>
+    <string name="action_call">Вызов</string>
 
     <string name="edit_tel">Номер телефона</string>
     <string name="edit_name">Название</string>

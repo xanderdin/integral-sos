@@ -1,10 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/action_call"
+          android:icon="@drawable/ic_action_communication_call"
+          android:orderInCategory="1"
+          app:showAsAction="withText|ifRoom"
+          android:title="@string/action_call"/>
 
     <item android:id="@+id/action_edit"
           android:icon="@drawable/ic_action_edit"
-          android:orderInCategory="1"
+          android:orderInCategory="2"
           app:showAsAction="withText|ifRoom"
           android:title="@string/action_edit"/>
 

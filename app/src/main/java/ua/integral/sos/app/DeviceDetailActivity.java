@@ -345,6 +345,9 @@ public class DeviceDetailActivity extends AbstractAppActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_call:
+                callDevice(getAlarmDevice().getRowId());
+                return true;
             case R.id.action_edit:
                 editDevice(getAlarmDevice().getRowId());
                 return true;
@@ -362,6 +365,9 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         if (null == info) { // This is from layout_device_header
             switch (item.getItemId()) {
+                case R.id.action_call:
+                    callDevice(getAlarmDevice().getRowId());
+                    return true;
                 case R.id.action_edit:
                     editDevice(getAlarmDevice().getRowId());
                     return true;
