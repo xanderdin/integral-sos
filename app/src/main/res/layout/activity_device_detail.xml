@@ -170,23 +170,6 @@
 
                     </LinearLayout>
 
-                    <!--
-                    <LinearLayout
-                        android:id="@+id/tab_device_users"
-                        android:orientation="vertical"
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent">
-
-                        <ListView
-                            android:id="@+id/user_list"
-                            android:layout_width="fill_parent"
-                            android:layout_height="fill_parent"/>
-
-                        <include layout="@layout/include_empty_user_list"/>
-
-                    </LinearLayout>
-                    -->
-
                 </FrameLayout>
 
             </LinearLayout>

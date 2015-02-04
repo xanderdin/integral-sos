@@ -11,12 +11,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.Toast;
 
 /**
@@ -100,11 +100,6 @@ public class AbstractAppActivity extends ActionBarActivity
             case R.id.zone_list:
                 inflater.inflate(R.menu.context_zone, menu);
                 break;
-            /*
-            case R.id.user_list:
-                inflater.inflate(R.menu.context_user, menu);
-                break;
-            */
         }
     }
 
@@ -158,7 +153,7 @@ public class AbstractAppActivity extends ActionBarActivity
             return;
         }
         Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + alarmDevice.getTel()));
+        intent.setData(Uri.parse("tel:" + alarmDevice.getDevTel()));
         startActivity(intent);
     }
 
@@ -170,43 +165,12 @@ public class AbstractAppActivity extends ActionBarActivity
             return;
         }
 
-        final String customName = alarmDevice.getDevName();
-
-        LayoutInflater factory = LayoutInflater.from(this);
-
-        final View dialogView = factory.inflate(R.layout.dialog_device_edit, null);
-
-        final EditText editCustomName = (EditText) dialogView.findViewById(R.id.edit_device_custom_name);
-
-        editCustomName.setText(customName);
-
-        AlertDialog d = new AlertDialog.Builder(this)
-                .setIcon(R.drawable.ic_action_edit)
-                .setTitle(R.string.dialog_device_edit_title)
-                .setView(dialogView)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        String newCustomName = editCustomName.getText().toString();
-
-                        if (TextUtils.equals(customName, newCustomName)) {
-                            return;
-                        }
-
-                        alarmDevice.setDevName(newCustomName);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
-                .create();
-
-        setDialog(d);
-        getDialog().show();
+        Intent intent = new Intent(Intent.ACTION_EDIT);
+        intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+        intent.setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI,
+                alarmDevice.getContactLookupKey()));
+        intent.putExtra("finishActivityOnSaveCompleted", true);
+        startActivity(intent);
     }
 
     protected void showToast(final String msg) {

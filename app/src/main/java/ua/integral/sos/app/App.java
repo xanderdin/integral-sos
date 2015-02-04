@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 /**
  * Created by aledin on 22.12.14.
@@ -70,11 +69,11 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
 
     private void initAlarmDeviceList() {
         String[] projection = {
-                AppDb.AlarmDeviceTable.COLUMN_DEV_TEL,
+                AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY,
         };
         String selection = null;
         String[] selectionArgs = null;
-        String sortOrder = AppDb.AlarmDeviceTable.COLUMN_DEV_TEL;
+        String sortOrder = AppDb.AlarmDeviceTable.COLUMN_SORT_ORDER;
         Cursor cursor = getContentResolver().query(AlarmDeviceProvider.CONTENT_URI,
                 projection, selection, selectionArgs, sortOrder);
         while (cursor.moveToNext()) {

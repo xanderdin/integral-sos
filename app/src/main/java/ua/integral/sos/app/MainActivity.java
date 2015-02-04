@@ -7,9 +7,9 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
-import android.view.*;
+import android.view.Menu;
+import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
 
@@ -36,8 +36,8 @@ public class MainActivity extends AbstractAppActivity
         deviceListView.setEmptyView(findViewById(android.R.id.empty));
 
         String from[] = {
-                AppDb.AlarmDeviceTable.COLUMN_DEV_TEL,
-                AppDb.AlarmDeviceTable.COLUMN_DEV_NAME,
+                AppDb.AlarmDeviceTable.COLUMN_ID, // for text_device_info
+                AppDb.AlarmDeviceTable.COLUMN_ID, // for text_device_name
                 AppDb.AlarmDeviceTable.COLUMN_ID, // for image_lock_icon
                 AppDb.AlarmDeviceTable.COLUMN_IS_BATTERY_LOW,
                 AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
@@ -113,17 +113,13 @@ public class MainActivity extends AbstractAppActivity
 
                 projection = new String[] {
                         AppDb.AlarmDeviceTable.COLUMN_ID,
-                        AppDb.AlarmDeviceTable.COLUMN_DEV_TEL,
-                        AppDb.AlarmDeviceTable.COLUMN_DEV_NAME,
-                        // ...
                         AppDb.AlarmDeviceTable.COLUMN_IS_BATTERY_LOW,
                         AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                         AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED,
                         AppDb.AlarmDeviceTable.COLUMN_IS_DEV_FAILURE,
                 };
 
-                sortOrder = AppDb.AlarmDeviceTable.COLUMN_SORT_ORDER + ", " +
-                        AppDb.AlarmDeviceTable.COLUMN_DEV_TEL;
+                sortOrder = AppDb.AlarmDeviceTable.COLUMN_SORT_ORDER;
 
                 cursorLoader = new CursorLoader(this, AlarmDeviceProvider.CONTENT_URI,
                         projection, null, null, sortOrder);
@@ -217,22 +213,20 @@ public class MainActivity extends AbstractAppActivity
 
                 case R.id.text_device_name:
 
-                    String name = cursor.getString(columnIndex);
+                    alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(cursor.getLong(columnIndex));
 
-                    if (TextUtils.isEmpty(name)) {
-                        name = cursor.getString(cursor.getColumnIndex(AppDb.AlarmDeviceTable.COLUMN_DEV_TEL));
+                    if (null == alarmDevice) {
+                        break;
                     }
 
-                    ((TextView) view).setText(name);
+                    ((TextView) view).setText(alarmDevice.getDevName());
                     view.setSelected(true);
 
                     return true;
 
                 case R.id.text_device_info:
 
-                    idx = cursor.getColumnIndex(AppDb.AlarmDeviceTable.COLUMN_ID);
-
-                    alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(cursor.getLong(idx));
+                    alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(cursor.getLong(columnIndex));
 
                     if (null == alarmDevice) {
                         break;
@@ -243,7 +237,7 @@ public class MainActivity extends AbstractAppActivity
                     }
 
                     String text = TextUtils.isEmpty(alarmDevice.getLastEventText())
-                            ? alarmDevice.getTel() : alarmDevice.getLastEventText();
+                            ? alarmDevice.getDevTel() : alarmDevice.getLastEventText();
 
                     ((TextView) view).setText(text);
                     view.setSelected(true);

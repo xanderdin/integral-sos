@@ -1,8 +1,5 @@
 package ua.integral.sos.app;
 
-import android.database.Cursor;
-import android.telephony.PhoneNumberUtils;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,12 +118,12 @@ public class AlarmDeviceList {
         return getList().get(rowId);
     }
 
-    public static synchronized AlarmDevice getAlarmDeviceByTel(String tel) {
-        for (AlarmDevice alarmDevice : getList().values()) {
-            if (PhoneNumberUtils.compare(alarmDevice.getTel(), tel)) {
-                return alarmDevice;
-            }
-        }
-        return null;
-    }
+//    public static synchronized AlarmDevice getAlarmDeviceByTel(String tel) {
+//        for (AlarmDevice alarmDevice : getList().values()) {
+//            if (PhoneNumberUtils.compare(alarmDevice.getTel(), tel)) {
+//                return alarmDevice;
+//            }
+//        }
+//        return null;
+//    }
 }

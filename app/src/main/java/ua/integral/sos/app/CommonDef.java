@@ -25,4 +25,6 @@ public class CommonDef {
     public final static String EXTRA_TEL = "tel";
     public final static String EXTRA_NAME = "name";
     public final static String EXTRA_SELECTED_ID = "selectedId";
+    public final static String EXTRA_CONTACT_LOOKUP_KEY = "contactLookupKey";
+    public final static String EXTRA_CONTACT_LOOKUP_URI = "contactLookupUri";
 }

@@ -40,7 +40,7 @@ public class SmsReceiver extends BroadcastReceiver {
             }
             String body = stringBuilder.toString();
             for (AlarmDevice alarmDevice : AlarmDeviceList.getList().values()) {
-                if (PhoneNumberUtils.compare(context, tel, alarmDevice.getTel())) {
+                if (PhoneNumberUtils.compare(context, tel, alarmDevice.getDevTel())) {
                     alarmDevice.parseMessage(body);
                     abortBroadcast();
                     break;

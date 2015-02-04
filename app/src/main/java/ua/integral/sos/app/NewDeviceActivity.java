@@ -1,24 +1,32 @@
 package ua.integral.sos.app;
 
-import android.support.v7.app.ActionBarActivity;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
+import android.provider.ContactsContract;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class NewDeviceActivity extends ActionBarActivity {
 
+    private final static int GET_CONTACT = 1;
+    private final static int ADD_CONTACT = 2;
+
     private String tel;
     private String name;
+    private String contactLookupKey;
+    private Uri contactLookupUri;
 
-    private EditText editTel;
-    private EditText editName;
+    private TextView textViewDeviceName;
+    private TextView textViewDeviceTel;
     private Button buttonAdd;
 
     @Override
@@ -29,47 +37,166 @@ public class NewDeviceActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        editTel = (EditText) findViewById(R.id.edit_tel);
-        editName = (EditText) findViewById(R.id.edit_name);
+        textViewDeviceName = (TextView) findViewById(R.id.text_view_device_name);
+        textViewDeviceTel = (TextView) findViewById(R.id.text_view_device_tel);
         buttonAdd = (Button) findViewById(R.id.button_add);
 
         buttonAdd.setEnabled(false);
 
-        if (null == savedInstanceState) {
-            setTel(getIntent().getStringExtra(CommonDef.EXTRA_TEL));
-            setName(getIntent().getStringExtra(CommonDef.EXTRA_NAME));
+        if (null != savedInstanceState) {
+            setContactLookupKey(savedInstanceState.getString(CommonDef.EXTRA_CONTACT_LOOKUP_KEY));
+            setContactLookupUri(savedInstanceState.getString(CommonDef.EXTRA_CONTACT_LOOKUP_URI));
+            setName(savedInstanceState.getString(CommonDef.EXTRA_NAME));
+            setTel(savedInstanceState.getString(CommonDef.EXTRA_TEL));
         }
 
-        editTel.setText(getTel());
-        editName.setText(getName());
+        textViewDeviceName.setText(getName());
+        textViewDeviceTel.setText(getTel());
 
         if (TextUtils.isEmpty(getTel())) {
             buttonAdd.setEnabled(false);
         } else {
             buttonAdd.setEnabled(true);
         }
-
-        InputWatcher watcher = new InputWatcher();
-
-        editTel.addTextChangedListener(watcher);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(CommonDef.EXTRA_TEL, getTel());
+        outState.putString(CommonDef.EXTRA_CONTACT_LOOKUP_KEY, getContactLookupKey());
+        if (null != getContactLookupUri()) {
+            outState.putString(CommonDef.EXTRA_CONTACT_LOOKUP_URI, getContactLookupUri().toString());
+        }
         outState.putString(CommonDef.EXTRA_NAME, getName());
+        outState.putString(CommonDef.EXTRA_TEL, getTel());
     }
 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_add:
-                setTel(editTel.getText().toString().trim());
-                setName(editName.getText().toString().trim());
-                AlarmDeviceList.put(new AlarmDevice(this, getTel(), getName()));
+                AlarmDeviceList.put(new AlarmDevice(this, getContactLookupKey()));
                 finish();
                 break;
+            case R.id.button_get_contact:
+                getContact();
+                break;
+            case R.id.button_add_contact:
+                addContact();
+                break;
         }
+    }
+
+    private void getContact() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setData(ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(intent, GET_CONTACT);
+    }
+
+    private void addContact() {
+        Intent intent = new Intent(ContactsContract.Intents.Insert.ACTION);
+        intent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+        intent.putExtra("finishActivityOnSaveCompleted", true);
+        startActivityForResult(intent, ADD_CONTACT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        if (null == data) {
+            return;
+        }
+
+        Uri uri = data.getData();
+
+        if (null == uri) {
+            return;
+        }
+
+        switch (requestCode) {
+            case ADD_CONTACT:
+            case GET_CONTACT:
+                setContactLookupUri(uri);
+                getContactData(uri);
+                break;
+        }
+    }
+
+    private void getContactData(Uri uri) {
+
+        @SuppressLint("InlinedApi")
+        String[] projection = {
+                ContactsContract.Contacts.LOOKUP_KEY,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                        ? ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
+                        : ContactsContract.Contacts.DISPLAY_NAME,
+        };
+
+        String selection = ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
+
+        Cursor cursor = getContentResolver().query(uri, projection, selection, null, null);
+
+        if (cursor.moveToNext()) {
+            setContactLookupKey(cursor.getString(0));
+            setName(cursor.getString(1));
+            textViewDeviceName.setText(getName());
+        } else {
+            setName("");
+            textViewDeviceName.setText("");
+            setTel("");
+            textViewDeviceTel.setText("");
+            buttonAdd.setEnabled(false);
+            Toast.makeText(this, getString(R.string.msg_contact_without_tel), Toast.LENGTH_SHORT).show();
+            cursor.close();
+            return;
+        }
+
+        cursor.close();
+
+        String[] proj = {
+                ContactsContract.CommonDataKinds.Phone.NUMBER,
+        };
+
+        String sel = ContactsContract.Data.LOOKUP_KEY + " = ? AND " +
+                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
+
+        String[] selArgs = {
+                getContactLookupKey(),
+        };
+
+        cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI, proj, sel, selArgs, null);
+
+        if (cursor.moveToNext()){
+            setTel(cursor.getString(0));
+            textViewDeviceTel.setText(getTel());
+        } else {
+            setTel(null);
+            textViewDeviceTel.setText("");
+        }
+
+        cursor.close();
+
+        if (TextUtils.isEmpty(getTel())) {
+            buttonAdd.setEnabled(false);
+        } else {
+            buttonAdd.setEnabled(true);
+        }
+    }
+
+    public Uri getContactLookupUri() {
+        return contactLookupUri;
+    }
+
+    public void setContactLookupUri(Uri contactLookupUri) {
+        this.contactLookupUri = contactLookupUri;
+    }
+
+    public void setContactLookupUri(String uri) {
+        setContactLookupUri(Uri.parse(uri));
     }
 
     public String getTel() {
@@ -80,44 +207,19 @@ public class NewDeviceActivity extends ActionBarActivity {
         this.tel = tel;
     }
 
+    public String getContactLookupKey() {
+        return contactLookupKey;
+    }
+
+    public void setContactLookupKey(String contactLookupKey) {
+        this.contactLookupKey = contactLookupKey;
+    }
+
     public String getName() {
-        return name;
+        return TextUtils.isEmpty(name) ? getTel() : name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    private class InputWatcher implements TextWatcher {
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-            buttonAdd.setEnabled(false);
-
-            String tel = editTel.getText().toString().trim();
-
-            if (tel.length() < CommonDef.TEL_MIN_LENGTH)
-                return;
-
-            if (!MiscFunc.isTelOk(tel)) {
-                editTel.setError(getString(R.string.err_bad_value));
-                return;
-            } else {
-                editTel.setError(null);
-            }
-
-            buttonAdd.setEnabled(true);
-        }
     }
 }

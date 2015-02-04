@@ -29,7 +29,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
     private final static int LOADER_ID_ZONES = 2;
     private final static int LOADER_ID_HISTORY = 3;
-    //private final static int LOADER_ID_USERS = 4;
 
     private AlarmDevice alarmDevice;
 
@@ -52,10 +51,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
     private ListView listHistory;
     private SimpleCursorAdapter historyListAdapter;
 
-    //private ListView listUsers;
-    //private SimpleCursorAdapter userListAdapter;
-
     private long devId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,28 +122,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         historyListAdapter.setViewBinder(historyListViewBinder);
 
-        /*
-        String usersFrom[] = {
-                AppDb.AlarmDeviceUserTable.COLUMN_USER_NUM,
-                AppDb.AlarmDeviceUserTable.COLUMN_USER_NAME,
-        };
-
-        int usersTo[] = {
-                R.id.text_user_num,
-                R.id.text_user_name,
-        };
-
-        userListAdapter = new SimpleCursorAdapter(
-                this,
-                R.layout.user_list_item,
-                null,
-                usersFrom,
-                usersTo,
-                0);
-
-        userListAdapter.setViewBinder(userListViewBinder);
-        */
-
         // tabs
         tabHost = (TabHost) findViewById(R.id.tabHost);
 
@@ -166,16 +141,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         tabHost.addTab(tabSpec);
 
-        /*
-        tabSpec = tabHost.newTabSpec("tab_users");
-        setTabSpecIndicator(tabHost, tabSpec, R.string.tab_device_users);
-        tabSpec.setContent(R.id.tab_device_users);
-
-        tabHost.addTab(tabSpec);
-        */
-
         tabHost.setCurrentTab(CommonVar.getDeviceDetailSelectedTabIdx());
-        //tabHost.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE); // FIXME: add users or remove tab
 
         gridZones = (GridView) findViewById(R.id.zone_list);
         gridZones.setEmptyView(findViewById(R.id.zone_list_empty));
@@ -183,12 +149,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         listHistory = (ListView) findViewById(R.id.history_list);
         listHistory.setEmptyView(findViewById(R.id.history_list_empty));
-
-        /*
-        listUsers = (ListView) findViewById(R.id.user_list);
-        listUsers.setEmptyView(findViewById(R.id.user_list_empty));
-        listUsers.setOnItemClickListener(this);
-        */
 
         alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(getDevId());
 
@@ -202,13 +162,10 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         listHistory.setAdapter(historyListAdapter);
 
-        //listUsers.setAdapter(userListAdapter);
-
         initLoaders();
 
         registerForContextMenu(findViewById(R.id.layout_device_header));
         registerForContextMenu(gridZones);
-        //registerForContextMenu(listUsers);
 
         setViewReady(true);
         refreshData();
@@ -254,7 +211,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
     private void initLoaders() {
         getSupportLoaderManager().initLoader(LOADER_ID_ZONES, null, this);
         getSupportLoaderManager().initLoader(LOADER_ID_HISTORY, null, this);
-        //getSupportLoaderManager().initLoader(LOADER_ID_USERS, null, this);
     }
 
     private void notifyDeviceChanged() {
@@ -269,9 +225,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
     @Override
     protected void onPause() {
-//        if (null != getMainService()) {
-//            getMainService().cancelNotification(getAlarmDevice().getGid(), getAlarmDevice().getNotificationId());
-//        }
         alarmDevice.cancelNotification();
         alarmDevice.removeListener(this);
         super.onPause();
@@ -310,26 +263,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
         CommonVar.setDeviceDetailSelectedTabIdx(tabHost.getCurrentTab());
     }
 
-//    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//
-//        MenuInflater inflater = getMenuInflater();
-//
-//        switch (v.getId()) {
-//            case R.id.layout_device_header:
-//                inflater.inflate(R.menu.context_device_detail, menu);
-//                break;
-//            case R.id.zone_list:
-//                inflater.inflate(R.menu.context_zone, menu);
-//                break;
-//            case R.id.user_list:
-//                inflater.inflate(R.menu.context_user, menu);
-//                break;
-//            default:
-//                super.onCreateContextMenu(menu, v, menuInfo);
-//        }
-//    }
-//
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         return super.onPrepareOptionsMenu(menu);
@@ -391,14 +324,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
                     }
                     removeZone(alarmDeviceZone);
                     return true;
-                /*
-                case R.id.action_user_edit:
-                    editUser(info.id);
-                    return true;
-                case R.id.action_user_remove:
-                    removeUser(info.id);
-                    return true;
-                */
             }
         }
 
@@ -477,29 +402,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
                         projection, selection, selectionArgs, sortOrder);
 
                 break;
-
-            /*
-            case LOADER_ID_USERS:
-
-                projection = new String[] {
-                        AppDb.AlarmDeviceUserTable.COLUMN_ID,
-                        AppDb.AlarmDeviceUserTable.COLUMN_USER_NUM,
-                        AppDb.AlarmDeviceUserTable.COLUMN_USER_NAME,
-                };
-
-                selection = AppDb.AlarmDeviceUserTable.COLUMN_DEV_ID + " = ?";
-
-                selectionArgs = new String[] { String.valueOf(getDevId()) };
-
-                sortOrder = AppDb.AlarmDeviceUserTable.COLUMN_USER_NUM;
-
-                cursorLoader = new CursorLoader(
-                        this,
-                        AlarmDeviceUserProvider.CONTENT_URI,
-                        projection, selection, selectionArgs, sortOrder);
-
-                break;
-             */
         }
 
         return cursorLoader;
@@ -515,11 +417,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case LOADER_ID_HISTORY:
                 historyListAdapter.swapCursor(data);
                 break;
-            /*
-            case LOADER_ID_USERS:
-                userListAdapter.swapCursor(data);
-                break;
-            */
         }
     }
 
@@ -533,11 +430,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case LOADER_ID_HISTORY:
                 historyListAdapter.swapCursor(null);
                 break;
-            /*
-            case LOADER_ID_USERS:
-                userListAdapter.swapCursor(null);
-                break;
-            */
         }
     }
 
@@ -707,48 +599,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
         }
     };
 
-    private final SimpleCursorAdapter.ViewBinder userListViewBinder = new SimpleCursorAdapter.ViewBinder() {
-        @Override
-        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-
-            //AlarmDeviceUser alarmDeviceUser;
-
-            switch (view.getId()) {
-
-                case R.id.text_user_name:
-                    String name = cursor.getString(columnIndex);
-                    ((TextView) view).setText(name);
-                    view.setSelected(true);
-                    return true;
-
-//                case R.id.image_user_presence:
-//
-//                    jid = cursor.getString(columnIndex);
-//
-//                    rosterUser = RosterUserList.get(jid);
-//
-//                    if (null == rosterUser) {
-//                        return true;
-//                    }
-//
-//                    if (CommonVar.getAccount().equals(rosterUser.getName())) {
-//
-//                        ((ImageView) view).setImageResource(R.drawable.ic_action_user_login);
-//
-//                    } else {
-//
-//                        Boolean isOnline = rosterUser.getIsOnline();
-//
-//                        ((ImageView) view).setImageResource(AlarmDeviceUser.getOnlineImgResourceId(isOnline));
-//                    }
-//
-//                    return true;
-            }
-
-            return false;
-        }
-    };
-
     private void showZoneInfo(long rowId) {
 
         final AlarmDeviceZone alarmDeviceZone = getAlarmDevice().getZoneByRowId(rowId);
@@ -828,7 +678,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
             devInfo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake_twice));
         }
         devInfo.setText(TextUtils.isEmpty(getAlarmDevice().getLastEventText())
-                ? getAlarmDevice().getTel() : getAlarmDevice().getLastEventText());
+                ? getAlarmDevice().getDevTel() : getAlarmDevice().getLastEventText());
         devInfo.setSelected(true);
 
         devLockIcon.setImageResource(getAlarmDevice().getLockImgResourceId());
@@ -855,7 +705,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         zoneListAdapter.notifyDataSetChanged();
         historyListAdapter.notifyDataSetChanged();
-        //userListAdapter.notifyDataSetChanged();
     }
 
     private void editZone(final int num) {
@@ -926,93 +775,6 @@ public class DeviceDetailActivity extends AbstractAppActivity
             showToast(R.string.msg_device_must_be_disarmed);
         }
     }
-
-    /*
-    private void removeUser(final long rowId) {
-
-        final AlarmDeviceUser alarmDeviceUser = getAlarmDevice().getUserByRowId(rowId);
-
-        if (null == alarmDeviceUser) {
-            return;
-        }
-
-        final String userName = TextUtils.isEmpty(alarmDeviceUser.getUserName())
-                ? String.valueOf(alarmDeviceUser.getUserNum())
-                : alarmDeviceUser.getUserName();
-
-        LayoutInflater factory = LayoutInflater.from(this);
-
-        AlertDialog d = new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(userName)
-                .setMessage(R.string.dialog_remove_user_message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getAlarmDevice().removeUser(alarmDeviceUser.getUserNum());
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
-                .create();
-        setDialog(d);
-        getDialog().show();
-    }
-
-    private void editUser(final long rowId) {
-
-        // The rowId corresponds not to the RosterUser, but to the AlarmDeviceUser!
-        // So first find AlarmDeviceUser.
-
-        final AlarmDeviceUser alarmDeviceUser = getAlarmDevice().getUserByRowId(rowId);
-
-        if (null == alarmDeviceUser) {
-            return;
-        }
-
-        final String userName = alarmDeviceUser.getUserName();
-
-        LayoutInflater factory = LayoutInflater.from(this);
-
-        final View dialogView = factory.inflate(R.layout.dialog_user_edit, null);
-
-        final EditText editCustomName = (EditText) dialogView.findViewById(R.id.edit_roster_user_name);
-
-        editCustomName.setText(userName);
-
-        AlertDialog d = new AlertDialog.Builder(this)
-                .setIcon(R.drawable.ic_action_edit)
-                .setTitle(R.string.dialog_user_edit_title)
-                .setView(dialogView)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        String newCustomName = editCustomName.getText().toString();
-
-                        if (TextUtils.equals(userName, newCustomName)) {
-                            return;
-                        }
-
-                        alarmDeviceUser.setUserName(newCustomName);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
-                .create();
-
-        setDialog(d);
-        getDialog().show();
-    }
-    */
 
     @Override
     public void onDataChanged() {

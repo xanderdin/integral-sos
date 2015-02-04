@@ -12,28 +12,20 @@
     <string name="action_settings">Настройки</string>
     <string name="action_edit">Изменить</string>
     <string name="action_remove">Удалить</string>
-    <string name="action_user_edit">Изменить</string>
     <string name="action_call">Вызов</string>
 
-    <string name="edit_tel">Номер телефона</string>
-    <string name="edit_name">Название</string>
     <string name="edit_device_custom_name">Название объекта</string>
     <string name="edit_zone_custom_name">Название зоны</string>
-    <string name="edit_user_name">Имя пользователя</string>
 
     <string name="button_add">Добавить</string>
-
-    <string name="err_must_be_filled">Нужно заполнить</string>
-    <string name="err_bad_value">Недопустимое значение</string>
-    <string name="err_too_short">Слишком коротко</string>
+    <string name="button_get_contact">Выбрать контакт</string>
+    <string name="button_add_contact">Новый контакт</string>
 
     <string name="dialog_remove_title">Удалить выбранный прибор?</string>
     <string name="dialog_remove_message">Все данные прибора будут удалены!</string>
     <string name="dialog_remove_zone_message">Удалить?</string>
-    <string name="dialog_remove_user_message">Удалить?</string>
     <string name="dialog_device_edit_title">Данные прибора</string>
     <string name="dialog_zone_edit_title">Данные зоны</string>
-    <string name="dialog_user_edit_title">Данные пользователя</string>
 
     <string name="title_activity_main">Приборы</string>
     <string name="title_activity_new_device">Новый прибор</string>
@@ -42,12 +34,12 @@
 
     <string name="tab_device_zones">Зоны</string>
     <string name="tab_device_history">История</string>
-    <string name="tab_device_users">Люди</string>
     <string name="tab_sound_supplied">Базовые</string>
     <string name="tab_sound_internal">Телефон</string>
     <string name="tab_sound_external">Внешние</string>
 
     <string name="msg_device_must_be_disarmed">Сначала надо снять прибор с охраны</string>
+    <string name="msg_contact_without_tel">У контакта нет телефонов</string>
 
     <string name="pref_device_title">Приборы</string>
     <string name="pref_max_history_records_title">Длина истории</string>
@@ -68,6 +60,8 @@
     <string name="text_view_app_author">Александр Правдин</string>
     <string name="text_view_app_firm">ПКБ Интеграл</string>
     <string name="text_view_credits_title">Благодарности:</string>
+    <string name="text_view_device_tel">Номер телефона</string>
+    <string name="text_view_device_name">Название</string>
 
     <string name="MSG_DisarmFailure">Снять не удалось</string>
     <string name="MSG_ArmFailure">Взять не удалось</string>

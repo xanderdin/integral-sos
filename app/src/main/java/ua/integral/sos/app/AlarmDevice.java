@@ -1,14 +1,16 @@
 package ua.integral.sos.app;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -89,8 +91,7 @@ public class AlarmDevice implements Comparable {
     private final static Pattern patternMsgBalans        = Pattern.compile(PATTERN_MSG_BALANS);
 
 
-    private final String devTel;
-    private String devName;
+    private final String contactLookupKey;
 
     private Boolean isTamperOpened;
     private Boolean isBatteryLow;
@@ -98,8 +99,6 @@ public class AlarmDevice implements Comparable {
     private Boolean isDevFailure;
 
     private final SortedSet<AlarmDeviceZone> zones = Collections.synchronizedSortedSet(new TreeSet<AlarmDeviceZone>());
-
-    //private final SortedSet<AlarmDeviceUser> users = Collections.synchronizedSortedSet(new TreeSet<AlarmDeviceUser>());
 
     private String lastEventText;
     private boolean isLastEventTextChanged;
@@ -117,35 +116,27 @@ public class AlarmDevice implements Comparable {
 
     private final ArrayList<AlarmDeviceListener> listeners = new ArrayList<AlarmDeviceListener>();
 
-
-    public AlarmDevice(Context context, String devTel) {
+    public AlarmDevice(Context context, String contactLookupKey) {
         this.context = context;
-        this.devTel = devTel;
+        this.contactLookupKey = contactLookupKey;
         tieWithDbRecord();
         loadZones();
-        //loadUsers();
     }
-
-    public AlarmDevice(Context context, String devTel, String devName) {
-        this(context, devTel);
-        setDevName(devName);
-    }
-
 
     private void tieWithDbRecord() {
 
         String projection[] = {
                 AppDb.AlarmDeviceTable.COLUMN_ID,
-                AppDb.AlarmDeviceTable.COLUMN_DEV_NAME,
+                AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY,
                 AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED,
                 AppDb.AlarmDeviceTable.COLUMN_IS_BATTERY_LOW,
                 AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                 AppDb.AlarmDeviceTable.COLUMN_IS_DEV_FAILURE,
         };
 
-        String selection = AppDb.AlarmDeviceTable.COLUMN_DEV_TEL + " = ?";
+        String selection = AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY + " = ?";
 
-        String selectionArgs[] = { getTel() };
+        String selectionArgs[] = { getContactLookupKey() };
 
         Cursor cursor = getContentResolver().query(
                 AlarmDeviceProvider.CONTENT_URI, projection, selection, selectionArgs, null);
@@ -156,11 +147,10 @@ public class AlarmDevice implements Comparable {
 
             devUri = ContentUris.withAppendedId(AlarmDeviceProvider.CONTENT_URI_ID_BASE, rowId);
 
-            if (!cursor.isNull(1)) devName = cursor.getString(1);
-            if (!cursor.isNull(2)) isTamperOpened = (cursor.getInt(2) != 0);
-            if (!cursor.isNull(3)) isBatteryLow = (cursor.getInt(3) != 0);
-            if (!cursor.isNull(4)) isPowerLost = (cursor.getInt(4) != 0);
-            if (!cursor.isNull(5)) isDevFailure = (cursor.getInt(5) != 0);
+            if (!cursor.isNull(1)) isTamperOpened = (cursor.getInt(1) != 0);
+            if (!cursor.isNull(2)) isBatteryLow = (cursor.getInt(2) != 0);
+            if (!cursor.isNull(3)) isPowerLost = (cursor.getInt(3) != 0);
+            if (!cursor.isNull(4)) isDevFailure = (cursor.getInt(4) != 0);
 
             cursor.close();
 
@@ -171,7 +161,7 @@ public class AlarmDevice implements Comparable {
 
         ContentValues values = new ContentValues();
 
-        values.put(AppDb.AlarmDeviceTable.COLUMN_DEV_TEL, getTel());
+        values.put(AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY, getContactLookupKey());
 
         devUri = getContentResolver().insert(AlarmDeviceProvider.CONTENT_URI, values);
 
@@ -202,49 +192,61 @@ public class AlarmDevice implements Comparable {
         cursor.close();
     }
 
-    /*
-    private void loadUsers() {
 
-        for (AlarmDeviceUser user: users) {
-            user.clear();
-        }
-        users.clear();
+    public String getDevName() {
 
-        String projection[] = {
-                AppDb.AlarmDeviceUserTable.COLUMN_USER_NUM,
+        @SuppressLint("InlinedApi")
+        String[] projection = {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                        ? ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
+                        : ContactsContract.Contacts.DISPLAY_NAME,
         };
 
-        String selection = AppDb.AlarmDeviceUserTable.COLUMN_DEV_ID + " = ?";
+        Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, getContactLookupKey());
 
-        String selectionArgs[] = { String.valueOf(getRowId()) };
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 
-        Cursor cursor = getContentResolver().query(
-                AlarmDeviceUserProvider.CONTENT_URI, projection, selection, selectionArgs, null);
+        String res;
 
-        while (cursor.moveToNext()) {
-            AlarmDeviceUser user = new AlarmDeviceUser(getContext(), getRowId(), cursor.getInt(0));
-            users.add(user);
+        if (cursor.moveToNext()) {
+            res = cursor.getString(0);
+        } else {
+            res = getDevTel();
         }
 
         cursor.close();
+
+        return res;
     }
-    */
 
-    public void setDevName(String val) {
 
-        if (TextUtils.isEmpty(val)) {
-            val = getTel();
+    public String getDevTel() {
+
+        String[] projection = {
+                ContactsContract.CommonDataKinds.Phone.NUMBER,
+        };
+
+        String selection = ContactsContract.Data.LOOKUP_KEY + " = ? AND " +
+                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
+
+        String[] selectionArgs = {
+                getContactLookupKey(),
+        };
+
+        Cursor cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+                projection, selection, selectionArgs, null);
+
+        String res;
+
+        if (cursor.moveToNext()) {
+            res = cursor.getString(0);
+        } else {
+            res = "";
         }
 
-        setProviderStringValue(AppDb.AlarmDeviceTable.COLUMN_DEV_NAME, val);
-        devName = val;
+        cursor.close();
 
-        notifyDataChanged();
-    }
-
-
-    public String getDevName() {
-        return TextUtils.isEmpty(devName) ? getTel() : devName;
+        return res;
     }
 
 
@@ -368,8 +370,8 @@ public class AlarmDevice implements Comparable {
     }
 
 
-    public String getTel() {
-        return devTel;
+    public String getContactLookupKey() {
+        return contactLookupKey;
     }
 
 
@@ -377,21 +379,6 @@ public class AlarmDevice implements Comparable {
         return zones;
     }
 
-    /*
-    public synchronized SortedSet<AlarmDeviceUser> getUsers() {
-        return users;
-    }
-
-
-    public synchronized AlarmDeviceUser getUserByRowId(long rowId) {
-        for (AlarmDeviceUser alarmDeviceUser : getUsers()) {
-            if (rowId == alarmDeviceUser.getRowId()) {
-                return alarmDeviceUser;
-            }
-        }
-        return null;
-    }
-    */
 
     public boolean isInAlarm() {
 
@@ -430,17 +417,6 @@ public class AlarmDevice implements Comparable {
 
 
     public synchronized void clear() {
-
-        //mainService.cancelNotification(getTel(), getNotificationId());
-
-        /*
-        for (AlarmDeviceUser u : users) {
-            u.clear();
-        }
-
-        users.clear();
-        */
-
         zones.clear();
         getListeners().clear();
         cancelNotification();
@@ -452,18 +428,6 @@ public class AlarmDevice implements Comparable {
         MiscProviderFunc.removeProviderRecord(getContext(), devUri);
     }
 
-    /*
-    public synchronized void removeUser(int num) {
-        for (Iterator i = getUsers().iterator(); i.hasNext();) {
-            AlarmDeviceUser user = (AlarmDeviceUser) i.next();
-            if (user.getUserNum() == num) {
-                i.remove();
-                user.remove();
-                break;
-            }
-        }
-    }
-    */
 
     public synchronized void removeZone(int num) {
         for (Iterator i = getZones().iterator(); i.hasNext();) {
@@ -513,6 +477,7 @@ public class AlarmDevice implements Comparable {
         return res;
     }
 
+
     public void parseMessage(String text) {
 
         Matcher matcherSms = patternSms.matcher(text);
@@ -526,7 +491,6 @@ public class AlarmDevice implements Comparable {
             Matcher m;
 
             AlarmDeviceZone alarmDeviceZone;
-            //String infoSb = "";
             StringBuilder infoSb = new StringBuilder();
             Uri sound = CommonVar.getTickSoundUri();
             Integer type = null;
@@ -764,10 +728,6 @@ public class AlarmDevice implements Comparable {
                     alarmDeviceZone.setIsFired(false);
                 }
 
-//                for (int i = 0; i < m.groupCount(); i++) {
-//                    Log.d("AAAA", "i = " + i + "; " + m.group(i));
-//                }
-
             } else if ((m = patternMsgVzyat.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_Armed));
@@ -832,70 +792,47 @@ public class AlarmDevice implements Comparable {
         builder.setWhen(time * 1000);
 
         Intent intent = new Intent(getContext(), DeviceDetailActivity.class);
-        intent.setAction(getContext().getPackageName() + "." + getTel()); // MAGIC!!! Without it extras won't be processed by activity!
+        intent.setAction(getContext().getPackageName() + "." + getContactLookupKey()); // MAGIC!!! Without it extras won't be processed by activity!
         intent.putExtra(CommonDef.EXTRA_SELECTED_ID, getRowId());
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(pendingIntent);
 
-        getNotificationManager().notify(getTel(), getNotificationId(), builder.build());
+        getNotificationManager().notify(getContactLookupKey(), getNotificationId(), builder.build());
 
     }
+
 
     public void cancelNotification() {
-        getNotificationManager().cancel(getTel(), getNotificationId());
+        getNotificationManager().cancel(getContactLookupKey(), getNotificationId());
     }
+
 
     private synchronized NotificationManager getNotificationManager() {
         return (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-//    private void procData(Chat chat, Message message, PacketExtension packetExtension) {
-//
-//        Serializer serializer = new Persister();
-//        DataExtension data;
-//
-//        try {
-//            data = serializer.read(DataExtension.class, packetExtension.toXML().toString());
-//        } catch (Exception e) {
-////            Log.d(TAG, e.getMessage());
-//            e.printStackTrace();
-//            return;
-//        }
-//
-//        long time = data.getTime();
-//
-//        AbstractData payload = data.getPayload();
-//
-//        if (null == payload) {
-//            return;
-//        }
-//
-//        if (payload instanceof DataSrvMsg) {
-//            procSrvMsg(chat, message, time, (DataSrvMsg) payload);
-//        } else if (payload instanceof DataIntOxCmd) {
-//            procIntOxCmd(chat, message, time, (DataIntOxCmd) payload, null);
-//        } else if (payload instanceof DataIntOxMsg) {
-//            procIntOxMsg(chat, message, time, (DataIntOxMsg) payload);
-//        }
-//    }
 
     private synchronized void setTextForAlertDialog(String s) {
         textForAlertDialog = s;
     }
 
+
     public synchronized void clearTextForAlertDialog() {
         textForAlertDialog = null;
     }
+
 
     public synchronized String getTextForAlertDialog() {
         return textForAlertDialog;
     }
 
+
     private synchronized ArrayList<AlarmDeviceListener> getListeners() {
         return listeners;
     }
+
 
     public void addListener(AlarmDeviceListener l) {
         if (!getListeners().contains(l)) {
@@ -903,366 +840,17 @@ public class AlarmDevice implements Comparable {
         }
     }
 
+
     public void removeListener(AlarmDeviceListener l) {
         getListeners().remove(l);
     }
+
 
     private void notifyDataChanged() {
         for (AlarmDeviceListener l : getListeners()) {
             l.onDataChanged();
         }
     }
-
-
-//    private void procSrvMsg(Chat chat, Message message, long time, DataSrvMsg data) {
-//
-//        AbstractData payload;
-//
-//        String text;
-//
-//        switch (data.getCode()) {
-//            case DataSrvMsg.CODE_USER_ACTIVATION_REQUEST_EXPIRED:
-//
-//                text = mainService.getString(R.string.msg_user_activation_request_expired);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_USER_DEACTIVATION_REQUEST_EXPIRED:
-//
-//                text = mainService.getString(R.string.msg_user_deactivation_request_expired);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_DEVICE_IS_OFFLINE:
-//
-//                setIsOnline(false);
-//
-//                text = mainService.getString(R.string.msg_device_is_offline);
-//
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                putWarningToEventHistory(time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_DEVICE_IS_ONLINE:
-//
-//                setIsOnline(true);
-//
-//                text = mainService.getString(R.string.msg_device_is_online);
-//
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                putToEventHistory(time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_BAD_LANGUAGE:
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_COMMAND_ACCEPTED:
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_COMMAND_BAD_SYNTAX:
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_NO_SUCH_DEVICE:
-//
-//                text = mainService.getString(R.string.msg_no_such_device);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_BURGLARY_CODE_REQUEST:
-//
-//                text = mainService.getString(R.string.msg_burglary_code_request);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_COMMAND_FAILED:
-//
-//                text = mainService.getString(R.string.msg_command_failed);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_USER_NOT_ACTIVATED:
-//
-//                text = mainService.getString(R.string.msg_user_not_activated);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                setIsSubscribed(false);
-//                mainService.requestUnsubscription(getJid());
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_USER_ALREADY_ACTIVATED:
-//
-//                text = mainService.getString(R.string.msg_user_already_activated);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                mainService.requestSubscription(getJid());
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_DEVICE_PROPERTIES:
-//
-//                payload = data.getPayload();
-//
-//                if (null == payload) {
-//                    return;
-//                }
-//
-//                procMuzDev(chat, message, time, (DataMuzDev) payload);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_ACTIVE_USERS_LIST:
-//
-//                payload = data.getPayload();
-//
-//                if (null == payload) {
-//                    return;
-//                }
-//
-//                procDevUsrList(chat, message, time, (DataDevUsersList) payload);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_DEVICE_MUST_BE_DISARMED:
-//
-//                text = mainService.getString(R.string.msg_device_must_be_disarmed);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_NO_SUCH_USER:
-//
-//                text = mainService.getString(R.string.msg_no_such_user);
-//
-//                setTextForAlertDialog(text);
-//                mainService.notifyAlarmDeviceChanged(getJid());
-//                mainService.showInfoNotificationAboutDevice(this, time, text);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_USER_SENT_COMMAND:
-//
-//                payload = data.getPayload();
-//
-//                if (null == payload) {
-//                    return;
-//                }
-//
-//                procDevUsr(chat, message, time, (DataDevUser) payload);
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_USER_ACTIVATED:
-//
-//                payload = data.getPayload();
-//
-//                if (null == payload) {
-//                    return;
-//                }
-//
-//                if (payload instanceof DataDevUser) {
-//
-//                    String usrJid = ((DataDevUser) payload).getJid();
-//                    usrJid = MiscFunc.bareJid(usrJid);
-//
-//                    text = mainService.getString(R.string.msg_user_activated);
-//                    text = text + ": " + MiscFunc.userFromJid(usrJid);
-//
-//                    mainService.showInfoNotificationAboutDevice(this, time, text);
-//                    putToEventHistory(time, text);
-//
-//                    if (mainService.getCurrentUser().equals(usrJid)) { // you're activated
-//
-//                        setTextForAlertDialog(text);
-//                        mainService.notifyAlarmDeviceChanged(getJid());
-//
-//                        // get subscription to device
-//                        mainService.requestSubscription(getJid());
-//
-//                        setIsSubscribed(true);
-//
-//                    } else { // other user activated
-//
-//                        // add user to db and list
-//                        AlarmDeviceUser user = new AlarmDeviceUser(mainService, getJabConn(),
-//                                getTel(), (DataDevUser) payload);
-//
-//                        users.add(user);
-//
-//                        // add to roster and get subscription to that user
-//                        mainService.addToRoster(usrJid, MiscFunc.userFromJid(usrJid));
-//                        mainService.requestSubscription(usrJid);
-//
-//                    }
-//                }
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_USER_DEACTIVATED:
-//
-//                payload = data.getPayload();
-//
-//                if (null == payload) {
-//                    return;
-//                }
-//
-//                if (payload instanceof DataDevUser) {
-//
-//                    String usrJid = ((DataDevUser) payload).getJid();
-//                    usrJid = MiscFunc.bareJid(usrJid);
-//
-//                    text = mainService.getString(R.string.msg_user_deactivated);
-//                    text = text + ": " + MiscFunc.userFromJid(usrJid);
-//
-//                    mainService.showInfoNotificationAboutDevice(this, time, text);
-//                    putToEventHistory(time, text);
-//
-//                    if (mainService.getCurrentUser().equals(usrJid)) { // you're deactivated
-//
-//                        setTextForAlertDialog(text);
-//                        mainService.notifyAlarmDeviceChanged(getJid());
-//                        setIsSubscribed(false);
-//                        mainService.notifyAlarmDeviceChanged(getJid());
-//
-//                    } else { // other user deactivated
-//                        mainService.removeFromRoster(usrJid);
-//                    }
-//                }
-//
-//                break;
-//
-//            case DataSrvMsg.CODE_DEVICE_CONFIG_CHANGED:
-//
-//                sendMessage(CMD_PANEL);
-//
-//                break;
-//
-//            default:
-//
-//                break;
-//        }
-//    }
-//
-//
-//    private void procDevUsr(Chat chat, Message message, long time, DataDevUser data) {
-//
-//        AbstractData payload = data.getPayload();
-//
-//        if (null == payload) {
-//            return;
-//        }
-//
-//        if (!(payload instanceof DataIntOxCmd)) {
-//            return;
-//        }
-//
-//        procIntOxCmd(chat, message, time, (DataIntOxCmd) payload,
-//                new AlarmDeviceUser(mainService, getJabConn(), getTel(), data));
-//    }
-//
-//
-//    private void procIntOxCmd(Chat chat, Message message, long time, DataIntOxCmd data, AlarmDeviceUser user) {
-//
-//        Integer num = data.getZone();
-//
-//        String zone;
-//
-//        if (null == num) {
-//
-//            TreeSet<Integer> nums = new TreeSet<Integer>();
-//
-//            for (AlarmDeviceZone z : getZones()) {
-//
-//                if (data.getCode() == IntOxProto.CMD_Arm) {
-//
-//                    if (!(z.getIsArmed() == null || z.getIsArmed() == false)) {
-//                        continue;
-//                    }
-//
-//                } else if (data.getCode() == IntOxProto.CMD_Disarm) {
-//
-//                    if (z.getIsArmed() == null || z.getIsArmed() == false) {
-//                        continue;
-//                    }
-//                }
-//
-//                nums.add(z.getNum());
-//            }
-//
-//            zone = zoneNumsFromTreeSet(nums);
-//
-//        } else {
-//            zone = num.toString();
-//        }
-//
-//        String info = mainService.getString(R.string.DEV_UserLetter) +
-//                ((null == user) ? "" : user.getUserNum()) + ": ";
-//
-//        switch (data.getCode()) {
-//
-//            case IntOxProto.CMD_Arm:
-//
-//                info += mainService.getString(R.string.CMD_Arm);
-//                info += (": " + zone);
-//
-//                break;
-//
-//            case IntOxProto.CMD_Disarm:
-//
-//                info += mainService.getString(R.string.CMD_Disarm);
-//                info += (": " + zone);
-//
-//                break;
-//
-//            case IntOxProto.CMD_GetState:
-//
-//                info += mainService.getString(R.string.CMD_GetState);
-//
-//                break;
-//        }
-//
-//        setLastEventText(info);
-//        putToEventHistory(time, info);
-//
-//        mainService.showTickNotificationAboutDevice(this, time, info);
-//        mainService.notifyAlarmDeviceChanged(getJid());
-//    }
 
 
     public AlarmDeviceZone getZoneByNumOrCreateNew(int num) {
@@ -1291,508 +879,9 @@ public class AlarmDevice implements Comparable {
     }
 
 
-//    private void procIntOxMsg(Chat chat, Message message, long time, DataIntOxMsg data) {
-//
-//        TreeSet<Integer> zoneNum = data.getZoneAsTreeSet();
-//        String zone = data.getZone();
-//        Integer userNum = data.getUser();
-//
-//        AlarmDeviceZone alarmDeviceZone;
-//        String info = "";
-//        Uri sound = mainService.getTickSoundUri();
-//        Integer type = null;
-//
-//
-//        switch (data.getCode()) {
-//
-//            case IntOxProto.MSG_DisarmFailure:
-//
-//                info = mainService.getString(R.string.MSG_DisarmFailure);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                break;
-//
-//            case IntOxProto.MSG_ArmFailure:
-//
-//                info = mainService.getString(R.string.MSG_ArmFailure);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                break;
-//
-//            case IntOxProto.MSG_Alarm:
-//
-//                info = mainService.getString(R.string.MSG_Alarm);
-//                sound = mainService.getAlarmSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsFired(true);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_Armed:
-//            case IntOxProto.MSG_AutoArmed:
-//            case IntOxProto.MSG_GrpAutoArmed:
-//
-//                info = mainService.getString(R.string.MSG_Armed);
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setState(AlarmDeviceZone.ST_OK); // FIXME: check this
-//                    alarmDeviceZone.setIsArmed(true);
-//                    alarmDeviceZone.setIsFired(false);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_Disarmed:
-//            case IntOxProto.MSG_AutoDisarmed:
-//            case IntOxProto.MSG_GrpAutoDisarmed:
-//
-//                info = mainService.getString(R.string.MSG_Disarmed);
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsArmed(false);
-//                    alarmDeviceZone.setIsFired(false);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_AlarmShort:
-//
-//                info = mainService.getString(R.string.MSG_AlarmShort);
-//                sound = mainService.getAlarmSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setState(AlarmDeviceZone.ST_SHORT);
-//                    alarmDeviceZone.setIsFired(true);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_AlarmTorn:
-//
-//                info = mainService.getString(R.string.MSG_AlarmTorn);
-//                sound = mainService.getAlarmSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setState(AlarmDeviceZone.ST_TORN);
-//                    alarmDeviceZone.setIsFired(true);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_StateOk:
-//            case IntOxProto.MSG_GrpStateOk:
-//
-//                info = mainService.getString(R.string.MSG_StateOk);
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setState(AlarmDeviceZone.ST_OK);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_Short:
-//            case IntOxProto.MSG_GrpShort:
-//
-//                info = mainService.getString(R.string.MSG_Short);
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setState(AlarmDeviceZone.ST_SHORT);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_Torn:
-//            case IntOxProto.MSG_GrpTorn:
-//
-//                info = mainService.getString(R.string.MSG_Torn);
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setState(AlarmDeviceZone.ST_TORN);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_NoInfo:
-//
-//                break;
-//
-//            case IntOxProto.MSG_Burglary:
-//
-//                info = mainService.getString(R.string.MSG_Burglary);
-//                sound = mainService.getAlarmSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
-//
-//                break;
-//
-//            case IntOxProto.MSG_Fault:
-//
-//                info = mainService.getString(R.string.MSG_Fault);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                if (null == zoneNum || zoneNum.isEmpty()) {
-//
-//                    setIsDevFailure(true);
-//
-//                    break;
-//                }
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsZoneFailure(true);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_NoFault:
-//
-//                info = mainService.getString(R.string.MSG_NoFault);
-//
-//                if (null == zoneNum || zoneNum.isEmpty()) {
-//
-//                    setIsDevFailure(false);
-//
-//                    break;
-//                }
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsZoneFailure(false);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_CaseOpened:
-//
-//                info = mainService.getString(R.string.MSG_CaseOpened);
-//
-//                if (null == zoneNum || zoneNum.isEmpty()) {
-//                    setIsTamperOpened(true);
-//                } else {
-//                    for (int num : zoneNum) {
-//                        alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                        alarmDeviceZone.setIsTamperOpened(true);
-//                    }
-//                }
-//
-//                if (isInAlarm()) {
-//                    sound = mainService.getAlarmSoundUri();
-//                    type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
-//                } else {
-//                    sound = mainService.getInfoSoundUri();
-//                    type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_BadAC:
-//
-//                info = mainService.getString(R.string.MSG_BadAC);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                setIsPowerLost(true);
-//
-//                break;
-//
-//            case IntOxProto.MSG_BadDC:
-//
-//                info = mainService.getString(R.string.MSG_BadDC);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                if (null == zoneNum || zoneNum.isEmpty()) {
-//                    setIsBatteryLow(true);
-//                    break;
-//                }
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsBatteryLow(true);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_GoodAC:
-//
-//                info = mainService.getString(R.string.MSG_GoodAC);
-//                setIsPowerLost(false);
-//
-//                break;
-//
-//            case IntOxProto.MSG_GoodDC:
-//
-//                info = mainService.getString(R.string.MSG_GoodDC);
-//
-//                if (null == zoneNum || zoneNum.isEmpty()) {
-//
-//                    setIsBatteryLow(false);
-//
-//                    break;
-//                }
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsBatteryLow(false);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_CaseClosed:
-//
-//                info = mainService.getString(R.string.MSG_CaseClosed);
-//
-//                if (null == zoneNum || zoneNum.isEmpty()) {
-//
-//                    setIsTamperOpened(false);
-//
-//                    break;
-//                }
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsTamperOpened(false);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_Crash:
-//
-//                info = mainService.getString(R.string.MSG_Crash);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                break;
-//
-//            case IntOxProto.MSG_LinkOff:
-//
-//                info = mainService.getString(R.string.MSG_LinkOff);
-//                sound = mainService.getInfoSoundUri();
-//                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsLinkLost(true);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_LinkOn:
-//
-//                info = mainService.getString(R.string.MSG_LinkOn);
-//
-//                for (int num : zoneNum) {
-//                    alarmDeviceZone = getZoneByNumOrCreateNew(num);
-//                    alarmDeviceZone.setIsLinkLost(false);
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_SetProg:
-//
-//                info = mainService.getString(R.string.MSG_SetProg);
-//                sound = mainService.getInfoSoundUri();
-//
-//                break;
-//
-//            case IntOxProto.MSG_Version:
-//
-//                info = mainService.getString(R.string.MSG_Version);
-//
-//                if (!(null == zoneNum || zoneNum.isEmpty() || null == userNum)) {
-//                    int major = zoneNum.iterator().next();
-//                    int minor = userNum;
-//                    info = info + ": " + major + "." + minor;
-//                }
-//
-//                break;
-//
-//            case IntOxProto.MSG_DeviceOn:
-//
-//                info = mainService.getString(R.string.MSG_DeviceOn);
-//                sound = mainService.getInfoSoundUri();
-//
-//                break;
-//
-//            case IntOxProto.MSG_DeviceOff:
-//
-//                info = mainService.getString(R.string.MSG_DeviceOff);
-//                sound = mainService.getInfoSoundUri();
-//
-//                break;
-//        }
-//
-//        if (!(TextUtils.isEmpty(zone) || data.getCode() == IntOxProto.MSG_Version)) {
-//            info += (": " + zone);
-//        }
-//
-//        if (!(null == userNum || userNum <= 0 || userNum > 16)) {
-//            switch (data.getCode()) {
-//                case IntOxProto.MSG_Armed:
-//                case IntOxProto.MSG_Disarmed:
-//                case IntOxProto.MSG_GrpAutoArmed:
-//                case IntOxProto.MSG_GrpAutoDisarmed:
-//                case IntOxProto.MSG_Burglary:
-//                    info += ("; " + getContext().getString(R.string.DEV_UserLetter) + userNum);
-//                    break;
-//            }
-//        }
-//
-//        setLastEventText(info);
-//        putToEventHistory(time, info, type);
-//
-//        mainService.showNotificationAboutDevice(this, time, info, sound);
-//        mainService.notifyAlarmDeviceChanged(getJid());
-//    }
-//
-//
-//    private void procMuzDev(Chat chat, Message message, long time, DataMuzDev data) {
-//
-//        setIsOnline(data.getIsOnline());
-//        setIsTamperOpened(data.getIsTamperOpened());
-//        setIsBatteryLow(data.getIsBatteryLow());
-//        setIsPowerLost(data.getIsPowerLost());
-//        setIsDevFailure(data.getIsDevFailure());
-//
-//        SortedSet<AlarmDeviceZone> tmpZones = new TreeSet<AlarmDeviceZone>();
-//
-//        for (AlarmDeviceZone z : getZones()) {
-//            tmpZones.add(z);
-//        }
-//
-//        getZones().clear();
-//
-//        if (!(data.getZones() == null || data.getZones().getZones() == null)) {
-//
-//            for (DataDevZone z : data.getZones().getZones()) {
-//
-//                AlarmDeviceZone zone = new AlarmDeviceZone(mainService, getJabConn(), getTel(), z.getNum());
-//
-//                zone.setState(z.getState());
-//                zone.setIsArmed(z.getIsArmed());
-//                zone.setIsTamperOpened(z.getIsTamperOpened());
-//                zone.setIsBatteryLow(z.getIsBatteryLow());
-//                zone.setIsFired(z.getIsFired());
-//                zone.setIsLinkLost(z.getIsLinkLost());
-//                zone.setIsZoneFailure(z.getIsZoneFailure());
-//                zone.setCustomName(z.getCustomName());
-//
-//                getZones().add(zone);
-//            }
-//        }
-//
-//        for (AlarmDeviceZone z1 : tmpZones) {
-//            boolean found = false;
-//            for (AlarmDeviceZone z2 : getZones()) {
-//                if (z2.getNum() == z1.getNum()) {
-//                    found = true;
-//                    break;
-//                }
-//            }
-//            if (!found) {
-//                z1.remove();
-//            }
-//        }
-//        tmpZones.clear();
-//
-//        mainService.notifyAlarmDeviceChanged(getJid());
-//    }
-//
-//
-//    private void procDevUsrList(Chat chat, Message message, long time, final DataDevUsersList data) {
-//
-//        Log.d(TAG, "procDevUsrList()");
-//
-//        new Runnable() {
-//            @Override
-//            public void run() {
-//                ContentValues values = new ContentValues();
-//
-//                values.put(AppDb.AlarmDeviceUserTable.COLUMN_TO_DELETE, 1);
-//
-//                String where = AppDb.AlarmDeviceUserTable.COLUMN_ACCOUNT + " = ? AND " +
-//                        AppDb.AlarmDeviceUserTable.COLUMN_DEV_GID + " = ?";
-//
-//                String whereArgs[] = { CommonVar.getAccount(), getTel() };
-//
-//                getContentResolver().update(AlarmDeviceUserProvider.CONTENT_URI, values, where, whereArgs);
-//
-//                for (DataDevUser du : data.getList()) {
-//
-//                    for (AlarmDeviceUser user : users) {
-//
-//                        if (user.getUserNum() == du.getNum() && user.getUserName().equals(du.getJid())) {
-//
-//                            //user.setToDelete(false);
-//
-//                            values = new ContentValues();
-//                            values.put(AppDb.AlarmDeviceUserTable.COLUMN_TO_DELETE, 0);
-//
-//                            String sel = where + " AND " + AppDb.AlarmDeviceUserTable.COLUMN_NUM + " = ?";
-//
-//                            String args[] = { CommonVar.getAccount(), getTel(), String.valueOf(user.getUserNum()) };
-//
-//                            getContentResolver().update(AlarmDeviceUserProvider.CONTENT_URI, values, sel, args);
-//
-//                            break;
-//                        }
-//                    }
-//                }
-//
-//                where = where + " AND " + AppDb.AlarmDeviceUserTable.COLUMN_TO_DELETE + " = 1";
-//
-//                getContentResolver().delete(AlarmDeviceUserProvider.CONTENT_URI, where ,whereArgs);
-//
-//                for (AlarmDeviceUser user : users) {
-//                    user.clear();
-//                }
-//
-//                users.clear();
-//
-//                for (DataDevUser du : data.getList()) {
-//
-//                    String name = null;
-//
-//                    RosterEntry entry = mainService.getRosterEntry(du.getJid());
-//
-//                    if (null != entry) {
-//                        name = entry.getName();
-//                    }
-//
-//                    if (TextUtils.isEmpty(name) || name.equals(du.getJid())) {
-//                        name = MiscFunc.userFromJid(du.getJid());
-//                    }
-//
-//                    AlarmDeviceUser user =  new AlarmDeviceUser(mainService, getJabConn(),
-//                            getTel(), du.getNum(), du.getJid(), name);
-//
-//                    users.add(user);
-//                    Log.d(TAG, "user online: " + user.getIsOnline());
-//                }
-//
-//            }
-//        }.run();
-//    }
-
-
     @Override
     public int compareTo(Object another) {
-        return this.getTel().compareToIgnoreCase(((AlarmDevice) another).getTel());
+        return this.getContactLookupKey().compareToIgnoreCase(((AlarmDevice) another).getContactLookupKey());
     }
 
 
@@ -1815,30 +904,8 @@ public class AlarmDevice implements Comparable {
 
 
     public int getLockImgResourceId() {
-//        return getLockImgResourceId(getIsSubscribed(), isArmed(), isInAlarm());
         return getLockImgResourceId(true, isArmed(), isInAlarm());
     }
-
-
-//    public static int getOnlineImgResourceId(Boolean isOnline) {
-//
-//        int res;
-//
-//        if (null == isOnline) {
-//            res = R.drawable.ic_action_question;
-//        } else if (isOnline) {
-//            res = R.drawable.ic_action_link_ok;
-//        } else {
-//            res = R.drawable.ic_action_link_lost;
-//        }
-//
-//        return res;
-//    }
-//
-//
-//    public int getOnlineImgResourceId() {
-//        return getOnlineImgResourceId(getIsOnline());
-//    }
 
 
     public static int getBatteryImgResourceId(Boolean isBatteryLow) {
