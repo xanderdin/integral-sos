@@ -678,7 +678,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
             devInfo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake_twice));
         }
         devInfo.setText(TextUtils.isEmpty(getAlarmDevice().getLastEventText())
-                ? getAlarmDevice().getDevTel() : getAlarmDevice().getLastEventText());
+                ? getAlarmDevice().getFirstDevTel() : getAlarmDevice().getLastEventText());
         devInfo.setSelected(true);
 
         devLockIcon.setImageResource(getAlarmDevice().getLockImgResourceId());

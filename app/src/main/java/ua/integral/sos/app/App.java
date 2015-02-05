@@ -68,17 +68,18 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
     }
 
     private void initAlarmDeviceList() {
-        String[] projection = {
-                AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY,
-        };
-        String selection = null;
-        String[] selectionArgs = null;
-        String sortOrder = AppDb.AlarmDeviceTable.COLUMN_SORT_ORDER;
-        Cursor cursor = getContentResolver().query(AlarmDeviceProvider.CONTENT_URI,
-                projection, selection, selectionArgs, sortOrder);
+
+        Cursor cursor = getContentResolver().query(
+                AlarmDeviceProvider.CONTENT_URI,
+                new String[] { AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY },
+                null,
+                null,
+                AppDb.AlarmDeviceTable.COLUMN_SORT_ORDER + " ASC");
+
         while (cursor.moveToNext()) {
             AlarmDeviceList.put(new AlarmDevice(getApplicationContext(), cursor.getString(0)));
         }
+
         cursor.close();
     }
 

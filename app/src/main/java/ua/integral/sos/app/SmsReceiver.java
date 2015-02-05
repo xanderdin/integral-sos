@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 public class SmsReceiver extends BroadcastReceiver {
 
@@ -39,11 +40,14 @@ public class SmsReceiver extends BroadcastReceiver {
                 stringBuilder.append(smsMessages[i].getMessageBody());
             }
             String body = stringBuilder.toString();
+            Log.d("AAA", "from: " + tel + "; body: " + body);
             for (AlarmDevice alarmDevice : AlarmDeviceList.getList().values()) {
-                if (PhoneNumberUtils.compare(context, tel, alarmDevice.getDevTel())) {
-                    alarmDevice.parseMessage(body);
-                    abortBroadcast();
-                    break;
+                for (String devTel : alarmDevice.getDevTels()) {
+                    if (PhoneNumberUtils.compare(context, tel, devTel)) {
+                        alarmDevice.parseMessage(body);
+                        abortBroadcast();
+                        return;
+                    }
                 }
             }
         } catch (Exception e) {

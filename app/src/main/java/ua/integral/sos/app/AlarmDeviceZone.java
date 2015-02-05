@@ -79,21 +79,19 @@ public class AlarmDeviceZone implements Comparable {
             if (!cursor.isNull(7)) isLinkLost = (cursor.getInt(7) != 0);
             if (!cursor.isNull(8)) isZoneFailure = (cursor.getInt(8) != 0);
 
-            cursor.close();
+        } else {
 
-            return;
+            ContentValues values = new ContentValues();
+
+            values.put(AppDb.AlarmDeviceZoneTable.COLUMN_DEV_ID, devId);
+            values.put(AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_NUM, zoneNum);
+
+            zoneUri = getContentResolver().insert(AlarmDeviceZoneProvider.CONTENT_URI, values);
+
+            rowId = Long.valueOf(zoneUri.getPathSegments().get(1));
         }
 
         cursor.close();
-
-        ContentValues values = new ContentValues();
-
-        values.put(AppDb.AlarmDeviceZoneTable.COLUMN_DEV_ID, devId);
-        values.put(AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_NUM, zoneNum);
-
-        zoneUri = getContentResolver().insert(AlarmDeviceZoneProvider.CONTENT_URI, values);
-
-        rowId = Long.valueOf(zoneUri.getPathSegments().get(1));
     }
 
 

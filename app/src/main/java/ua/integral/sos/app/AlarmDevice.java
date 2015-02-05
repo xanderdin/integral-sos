@@ -11,6 +11,7 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -152,20 +153,18 @@ public class AlarmDevice implements Comparable {
             if (!cursor.isNull(3)) isPowerLost = (cursor.getInt(3) != 0);
             if (!cursor.isNull(4)) isDevFailure = (cursor.getInt(4) != 0);
 
-            cursor.close();
+        } else {
 
-            return;
+            ContentValues values = new ContentValues();
+
+            values.put(AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY, getContactLookupKey());
+
+            devUri = getContentResolver().insert(AlarmDeviceProvider.CONTENT_URI, values);
+
+            rowId = Long.valueOf(devUri.getPathSegments().get(1));
         }
 
         cursor.close();
-
-        ContentValues values = new ContentValues();
-
-        values.put(AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY, getContactLookupKey());
-
-        devUri = getContentResolver().insert(AlarmDeviceProvider.CONTENT_URI, values);
-
-        rowId = Long.valueOf(devUri.getPathSegments().get(1));
     }
 
 
@@ -211,7 +210,7 @@ public class AlarmDevice implements Comparable {
         if (cursor.moveToNext()) {
             res = cursor.getString(0);
         } else {
-            res = getDevTel();
+            res = getFirstDevTel();
         }
 
         cursor.close();
@@ -220,31 +219,89 @@ public class AlarmDevice implements Comparable {
     }
 
 
-    public String getDevTel() {
+    public String getFirstDevTel() {
+
+//        String[] projection = {
+//                ContactsContract.CommonDataKinds.Phone.NUMBER,
+//        };
+//
+//        String selection = ContactsContract.Data.LOOKUP_KEY + " = ? AND " +
+//                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
+//
+//        String[] selectionArgs = {
+//                getContactLookupKey(),
+//        };
+//
+//        Cursor cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+//                projection, selection, selectionArgs, null);
+//
+//        String res;
+//
+//        if (cursor.moveToNext()) {
+//            res = cursor.getString(0);
+//        } else {
+//            res = "";
+//        }
+//
+//        cursor.close();
+//
+//        return res;
+
+        ArrayList<String> tels = getDevTels();
+
+        return tels.isEmpty() ? "" : tels.get(0);
+    }
+
+
+    public ArrayList<String> getDevTels() {
+
+        ArrayList<String> res = new ArrayList<>();
+
+        Cursor cursor = getContentResolver().query(
+                Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, getContactLookupKey()),
+                new String[] { ContactsContract.Contacts._ID },
+                ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1",
+                null,
+                null
+                );
+
+        long contactId;
+
+        if (cursor.moveToNext()) {
+            contactId = cursor.getLong(0);
+        } else {
+            cursor.close();
+            return res;
+        }
+
+        cursor.close();
 
         String[] projection = {
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
         };
 
-        String selection = ContactsContract.Data.LOOKUP_KEY + " = ? AND " +
-                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
+        String selection = ContactsContract.Data.CONTACT_ID + " = ? AND " +
+                ContactsContract.Data.MIMETYPE + " = ?";
 
         String[] selectionArgs = {
-                getContactLookupKey(),
+                String.valueOf(contactId),
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
         };
 
-        Cursor cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI,
-                projection, selection, selectionArgs, null);
+        String orderBy = ContactsContract.Data._ID + " ASC";
 
-        String res;
+        cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+                projection, selection, selectionArgs, orderBy);
 
-        if (cursor.moveToNext()) {
-            res = cursor.getString(0);
-        } else {
-            res = "";
+        while (cursor.moveToNext()) {
+            res.add(cursor.getString(0));
         }
 
         cursor.close();
+
+        for (String s : res) {
+            Log.d("ZZZ", "num: " + s);
+        }
 
         return res;
     }

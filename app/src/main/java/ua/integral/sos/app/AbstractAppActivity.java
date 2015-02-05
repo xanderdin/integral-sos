@@ -153,7 +153,7 @@ public class AbstractAppActivity extends ActionBarActivity
             return;
         }
         Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + alarmDevice.getDevTel()));
+        intent.setData(Uri.parse("tel:" + alarmDevice.getFirstDevTel()));
         startActivity(intent);
     }
 

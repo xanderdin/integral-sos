@@ -14,19 +14,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 
 public class NewDeviceActivity extends ActionBarActivity {
 
     private final static int GET_CONTACT = 1;
     private final static int ADD_CONTACT = 2;
 
-    private String tel;
-    private String name;
     private String contactLookupKey;
-    private Uri contactLookupUri;
 
-    private TextView textViewDeviceName;
-    private TextView textViewDeviceTel;
+    private String devName;
+    private String devTel;
+
+    private TextView textViewDevName;
+    private TextView textViewDevTel;
     private Button buttonAdd;
 
     @Override
@@ -37,23 +39,22 @@ public class NewDeviceActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        textViewDeviceName = (TextView) findViewById(R.id.text_view_device_name);
-        textViewDeviceTel = (TextView) findViewById(R.id.text_view_device_tel);
+        textViewDevName = (TextView) findViewById(R.id.text_view_device_name);
+        textViewDevTel = (TextView) findViewById(R.id.text_view_device_tel);
         buttonAdd = (Button) findViewById(R.id.button_add);
 
         buttonAdd.setEnabled(false);
 
         if (null != savedInstanceState) {
             setContactLookupKey(savedInstanceState.getString(CommonDef.EXTRA_CONTACT_LOOKUP_KEY));
-            setContactLookupUri(savedInstanceState.getString(CommonDef.EXTRA_CONTACT_LOOKUP_URI));
-            setName(savedInstanceState.getString(CommonDef.EXTRA_NAME));
-            setTel(savedInstanceState.getString(CommonDef.EXTRA_TEL));
+            setDevName(savedInstanceState.getString(CommonDef.EXTRA_NAME));
+            setDevTel(savedInstanceState.getString(CommonDef.EXTRA_TEL));
         }
 
-        textViewDeviceName.setText(getName());
-        textViewDeviceTel.setText(getTel());
+        textViewDevName.setText(getDevName());
+        textViewDevTel.setText(getDevTel());
 
-        if (TextUtils.isEmpty(getTel())) {
+        if (TextUtils.isEmpty(getDevTel())) {
             buttonAdd.setEnabled(false);
         } else {
             buttonAdd.setEnabled(true);
@@ -64,11 +65,8 @@ public class NewDeviceActivity extends ActionBarActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(CommonDef.EXTRA_CONTACT_LOOKUP_KEY, getContactLookupKey());
-        if (null != getContactLookupUri()) {
-            outState.putString(CommonDef.EXTRA_CONTACT_LOOKUP_URI, getContactLookupUri().toString());
-        }
-        outState.putString(CommonDef.EXTRA_NAME, getName());
-        outState.putString(CommonDef.EXTRA_TEL, getTel());
+        outState.putString(CommonDef.EXTRA_NAME, getDevName());
+        outState.putString(CommonDef.EXTRA_TEL, getDevTel());
     }
 
     public void onClick(View v) {
@@ -120,7 +118,6 @@ public class NewDeviceActivity extends ActionBarActivity {
         switch (requestCode) {
             case ADD_CONTACT:
             case GET_CONTACT:
-                setContactLookupUri(uri);
                 getContactData(uri);
                 break;
         }
@@ -134,6 +131,7 @@ public class NewDeviceActivity extends ActionBarActivity {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
                         ? ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
                         : ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.Contacts._ID,
         };
 
         String selection = ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
@@ -142,69 +140,62 @@ public class NewDeviceActivity extends ActionBarActivity {
 
         if (cursor.moveToNext()) {
             setContactLookupKey(cursor.getString(0));
-            setName(cursor.getString(1));
-            textViewDeviceName.setText(getName());
+            setDevName(cursor.getString(1));
+            ArrayList<String> tels = getContactTels(cursor.getLong(2));
+            setDevTel(tels.isEmpty() ? "" : tels.get(0));
         } else {
-            setName("");
-            textViewDeviceName.setText("");
-            setTel("");
-            textViewDeviceTel.setText("");
-            buttonAdd.setEnabled(false);
+            setDevName("");
+            setDevTel("");
+        }
+
+        cursor.close();
+
+        textViewDevName.setText(getDevName());
+        textViewDevTel.setText(getDevTel());
+
+        if (TextUtils.isEmpty(getDevTel())) {
             Toast.makeText(this, getString(R.string.msg_contact_without_tel), Toast.LENGTH_SHORT).show();
-            cursor.close();
-            return;
-        }
-
-        cursor.close();
-
-        String[] proj = {
-                ContactsContract.CommonDataKinds.Phone.NUMBER,
-        };
-
-        String sel = ContactsContract.Data.LOOKUP_KEY + " = ? AND " +
-                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
-
-        String[] selArgs = {
-                getContactLookupKey(),
-        };
-
-        cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI, proj, sel, selArgs, null);
-
-        if (cursor.moveToNext()){
-            setTel(cursor.getString(0));
-            textViewDeviceTel.setText(getTel());
-        } else {
-            setTel(null);
-            textViewDeviceTel.setText("");
-        }
-
-        cursor.close();
-
-        if (TextUtils.isEmpty(getTel())) {
             buttonAdd.setEnabled(false);
         } else {
             buttonAdd.setEnabled(true);
         }
     }
 
-    public Uri getContactLookupUri() {
-        return contactLookupUri;
+    private ArrayList<String> getContactTels(long contactId) {
+
+        ArrayList<String> res = new ArrayList<>();
+
+        String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER };
+
+        String selection = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+
+        String[] selectionArgs = {
+                String.valueOf(contactId),
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+        };
+
+        String orderBy = ContactsContract.Data._ID + " ASC";
+
+        Cursor cursor = getContentResolver().query(
+                ContactsContract.Data.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                orderBy);
+
+        while (cursor.moveToNext()) {
+            res.add(cursor.getString(0));
+        }
+
+        return res;
     }
 
-    public void setContactLookupUri(Uri contactLookupUri) {
-        this.contactLookupUri = contactLookupUri;
+    public String getDevTel() {
+        return devTel;
     }
 
-    public void setContactLookupUri(String uri) {
-        setContactLookupUri(Uri.parse(uri));
-    }
-
-    public String getTel() {
-        return tel;
-    }
-
-    public void setTel(String tel) {
-        this.tel = tel;
+    public void setDevTel(String devTel) {
+        this.devTel = devTel;
     }
 
     public String getContactLookupKey() {
@@ -215,11 +206,11 @@ public class NewDeviceActivity extends ActionBarActivity {
         this.contactLookupKey = contactLookupKey;
     }
 
-    public String getName() {
-        return TextUtils.isEmpty(name) ? getTel() : name;
+    public String getDevName() {
+        return TextUtils.isEmpty(devName) ? getDevTel() : devName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDevName(String devName) {
+        this.devName = devName;
     }
 }

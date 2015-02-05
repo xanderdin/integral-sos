@@ -237,7 +237,7 @@ public class MainActivity extends AbstractAppActivity
                     }
 
                     String text = TextUtils.isEmpty(alarmDevice.getLastEventText())
-                            ? alarmDevice.getDevTel() : alarmDevice.getLastEventText();
+                            ? alarmDevice.getFirstDevTel() : alarmDevice.getLastEventText();
 
                     ((TextView) view).setText(text);
                     view.setSelected(true);
