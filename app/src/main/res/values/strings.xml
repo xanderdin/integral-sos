@@ -100,6 +100,8 @@
     <string name="MSG_Test">Test</string>
     <string name="MSG_Balance">Balance</string>
 
+    <string name="MSG_BruteForce">Brute force</string>
+
     <string name="DEV_UserLetter">U</string>
 
 </resources>

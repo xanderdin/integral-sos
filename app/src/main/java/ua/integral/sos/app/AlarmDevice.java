@@ -571,7 +571,10 @@ public class AlarmDevice implements Comparable {
                 }
 
             } else if ((m = patternMsgPodborKoda.matcher(msg)).matches()) {
-                // TODO
+
+                infoSb.append(getContext().getString(R.string.MSG_BruteForce));
+                sound = CommonVar.getAlarmSoundUri();
+                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
 
             } else if ((m = patternMsgNapadenie.matcher(msg)).matches()) {
 
@@ -820,7 +823,7 @@ public class AlarmDevice implements Comparable {
             long time = MiscFunc.now();
             setLastEventText(info);
             putToEventHistory(time, info, type);
-            showNotification(time, info, sound);
+            showNotification(time, info, type, sound);
         }
         if (cnt == 0) {
             putToEventHistory(text);
@@ -828,11 +831,14 @@ public class AlarmDevice implements Comparable {
     }
 
 
-    private void showNotification(long time, String text, Uri sound) {
+    private void showNotification(long time, String text, Integer type, Uri sound) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
 
         if (isInAlarm()) {
             builder.setSmallIcon(R.drawable.ic_stat_lock_broken);
+            builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+        } else if (null != type && type == AppDb.EventHistoryTable.EVENT_TYPE_WARNING) {
+            builder.setSmallIcon(R.drawable.ic_stat_notification_warning);
             builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
         } else {
             builder.setSmallIcon(R.drawable.ic_stat_communication_message);

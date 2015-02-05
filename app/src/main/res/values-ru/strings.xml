@@ -100,6 +100,8 @@
     <string name="MSG_Test">Тест</string>
     <string name="MSG_Balance">Баланс</string>
 
+    <string name="MSG_BruteForce">Подбор кода</string>
+
     <string name="DEV_UserLetter">П</string>
 
 </resources>
