@@ -11,7 +11,6 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -298,10 +297,6 @@ public class AlarmDevice implements Comparable {
         }
 
         cursor.close();
-
-        for (String s : res) {
-            Log.d("ZZZ", "num: " + s);
-        }
 
         return res;
     }
