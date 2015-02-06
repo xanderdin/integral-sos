@@ -15,7 +15,7 @@
         android:clickable="true"
         android:longClickable="true"
         android:onClick="onClick"
-        android:background="@android:drawable/editbox_background_normal">
+        android:background="@drawable/device_detail_header_background">
 
         <ImageView
             android:id="@+id/image_lock_icon"
