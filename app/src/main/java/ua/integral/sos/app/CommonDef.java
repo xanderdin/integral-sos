@@ -19,12 +19,12 @@ public class CommonDef {
     public final static String PREF_VAL_DEFAULT_URI_SOUND_TICK =
             "android.resource://my.pocket.tomtit/raw/tick_sound_01";
 
-    public final static int TEL_MIN_LENGTH = 10;
-    public final static int TEL_MAX_LENGTH = 15;
-
     public final static String EXTRA_TEL = "tel";
     public final static String EXTRA_NAME = "name";
     public final static String EXTRA_SELECTED_ID = "selectedId";
     public final static String EXTRA_CONTACT_LOOKUP_KEY = "contactLookupKey";
-    public final static String EXTRA_CONTACT_LOOKUP_URI = "contactLookupUri";
+
+    public final static int NOTIFICATION_TYPE_TICK      = 0;
+    public final static int NOTIFICATION_TYPE_INFO      = 1;
+    public final static int NOTIFICATION_TYPE_ALARM     = 2;
 }

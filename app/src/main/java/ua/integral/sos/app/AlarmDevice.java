@@ -544,8 +544,7 @@ public class AlarmDevice implements Comparable {
 
             AlarmDeviceZone alarmDeviceZone;
             StringBuilder infoSb = new StringBuilder();
-            Uri sound = CommonVar.getTickSoundUri();
-            Integer type = null;
+            Integer eventHistoryType = null;
             String userNumStr = null;
             String zonesStr = null;
 
@@ -554,8 +553,7 @@ public class AlarmDevice implements Comparable {
             if ((m = patternMsgTrevoga.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_Alarm));
-                sound = CommonVar.getAlarmSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
 
                 zonesStr = m.group(4);
 
@@ -568,14 +566,12 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsgPodborKoda.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_BruteForce));
-                sound = CommonVar.getAlarmSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
 
             } else if ((m = patternMsgNapadenie.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_Burglary));
-                sound = CommonVar.getAlarmSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
                 userNumStr = m.group(7);
 
             } else if ((m = patternMsgVskrit.matcher(msg)).matches()) {
@@ -597,18 +593,14 @@ public class AlarmDevice implements Comparable {
                 }
 
                 if (isInAlarm()) {
-                    sound = CommonVar.getAlarmSoundUri();
-                    type = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
-
+                    eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_ALARM;
                 } else {
-                    sound = CommonVar.getInfoSoundUri();
-                    type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                    eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
                 }
 
             } else if ((m = patternMsgOtkluchenie.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_DeviceOff));
-                sound = CommonVar.getInfoSoundUri();
 
             } else if ((m = patternMsgZakrit.matcher(msg)).matches()) {
 
@@ -631,8 +623,7 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsg220Net.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_BadAC));
-                sound = CommonVar.getInfoSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
                 setIsPowerLost(true);
 
@@ -644,8 +635,7 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsgBatNeNorma.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_BadDC));
-                sound = CommonVar.getInfoSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
                 int i = 0;
 
@@ -682,8 +672,7 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsgNetSvyazi.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_LinkOff));
-                sound = CommonVar.getInfoSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
                 zonesStr = m.group(4);
 
@@ -728,8 +717,7 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsgNeispraven.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_Crash));
-                sound = CommonVar.getInfoSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
                 int i = 0;
 
@@ -748,8 +736,7 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsgOshibka.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_Fault));
-                sound = CommonVar.getInfoSoundUri();
-                type = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
 
                 int i = 0;
 
@@ -814,31 +801,69 @@ public class AlarmDevice implements Comparable {
                 infoSb.append("; ").append(getContext().getString(R.string.DEV_UserLetter)).append(userNumStr);
             }
 
-            String info = infoSb.toString();
             long time = MiscFunc.now();
+            String info = infoSb.toString();
+
             setLastEventText(info);
-            putToEventHistory(time, info, type);
-            showNotification(time, info, type, sound);
+            putToEventHistory(time, info, eventHistoryType);
+
+            if (null == eventHistoryType) {
+                showTickNotification(time, info);
+            } else if (eventHistoryType == AppDb.EventHistoryTable.EVENT_TYPE_WARNING) {
+                showInfoNotification(time, info);
+            } else if (eventHistoryType == AppDb.EventHistoryTable.EVENT_TYPE_ALARM) {
+                showAlarmNotification(time, info);
+            } else {
+                showTickNotification(time, info);
+            }
         }
         if (cnt == 0) {
             putToEventHistory(text);
+            showTickNotification(MiscFunc.now(), text);
         }
     }
 
 
-    private void showNotification(long time, String text, Integer type, Uri sound) {
+    private void showAlarmNotification(long time, String text) {
+        showNotification(time, text, CommonDef.NOTIFICATION_TYPE_ALARM);
+    }
+
+    private void showInfoNotification(long time, String text) {
+        showNotification(time, text, CommonDef.NOTIFICATION_TYPE_INFO);
+    }
+
+    private void showTickNotification(long time, String text) {
+        showNotification(time, text, CommonDef.NOTIFICATION_TYPE_TICK);
+    }
+
+    private void showNotification(long time, String text, int type) {
+
+        Uri sound;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
+
+        switch (type) {
+            case CommonDef.NOTIFICATION_TYPE_ALARM:
+                sound = CommonVar.getAlarmSoundUri();
+                builder.setSmallIcon(R.drawable.ic_stat_lock_broken);
+                builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+                break;
+            case CommonDef.NOTIFICATION_TYPE_INFO:
+                sound = CommonVar.getInfoSoundUri();
+                builder.setSmallIcon(R.drawable.ic_stat_notification_warning);
+                builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
+                break;
+            case CommonDef.NOTIFICATION_TYPE_TICK:
+            default:
+                sound = CommonVar.getTickSoundUri();
+                builder.setSmallIcon(R.drawable.ic_stat_communication_message);
+                builder.setDefaults(Notification.DEFAULT_LIGHTS);
+                break;
+        }
 
         if (isInAlarm()) {
             builder.setSmallIcon(R.drawable.ic_stat_lock_broken);
-            builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
-        } else if (null != type && type == AppDb.EventHistoryTable.EVENT_TYPE_WARNING) {
-            builder.setSmallIcon(R.drawable.ic_stat_notification_warning);
-            builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
-        } else {
-            builder.setSmallIcon(R.drawable.ic_stat_communication_message);
-            builder.setDefaults(Notification.DEFAULT_LIGHTS);
         }
+
         builder.setContentTitle(getDevName());
         builder.setContentText(text);
         builder.setTicker(getDevName() + ": " + text);
