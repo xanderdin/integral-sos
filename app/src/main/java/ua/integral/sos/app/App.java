@@ -31,6 +31,8 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
         initSounds();
 
         initAlarmDeviceList();
+
+        sp.registerOnSharedPreferenceChangeListener(this);
     }
 
     private static void initSoundDefaultPreferences(SharedPreferences sp) {

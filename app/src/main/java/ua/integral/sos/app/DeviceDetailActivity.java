@@ -225,8 +225,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
     @Override
     protected void onPause() {
-        alarmDevice.cancelNotification();
-        alarmDevice.removeListener(this);
+        getAlarmDevice().cancelNotification();
+        getAlarmDevice().removeListener(this);
         super.onPause();
     }
 
@@ -234,7 +234,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
     protected void onResume() {
         super.onResume();
         notifyDeviceChanged();
-        alarmDevice.addListener(this);
+        getAlarmDevice().addListener(this);
     }
 
     @Override
