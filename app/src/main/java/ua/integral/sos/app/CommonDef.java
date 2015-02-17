@@ -8,6 +8,9 @@ public class CommonDef {
     public final static String PREF_KEY_MAX_HISTORY_RECORDS = "max_history_records";
     public final static int    PREF_VAL_MAX_HISTORY_RECORDS = 1000;
 
+    public final static String PREF_KEY_LOW_MONEY_THRESHOLD = "low_money_threshold";
+    public final static double PREF_VAL_LOW_MONEY_THRESHOLD = 10.0;
+
     public final static String PREF_KEY_URI_SOUND_ALARM  = "uri_sound_alarm";
     public final static String PREF_KEY_URI_SOUND_INFO   = "uri_sound_info";
     public final static String PREF_KEY_URI_SOUND_TICK   = "uri_sound_tick";

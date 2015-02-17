@@ -36,6 +36,7 @@ public class AppDb extends SQLiteOpenHelper {
         public final static String COLUMN_IS_BATTERY_LOW      = "isBatteryLow";
         public final static String COLUMN_IS_POWER_LOST       = "isPowerLost";
         public final static String COLUMN_IS_DEV_FAILURE      = "isDevFailure";
+        public final static String COLUMN_MONEY_LEFT          = "moneyLeft";
 
         public final static String COLUMNS[] = {
                 COLUMN_ID,
@@ -46,6 +47,7 @@ public class AppDb extends SQLiteOpenHelper {
                 COLUMN_IS_BATTERY_LOW,
                 COLUMN_IS_POWER_LOST,
                 COLUMN_IS_DEV_FAILURE,
+                COLUMN_MONEY_LEFT,
         };
     }
 
@@ -126,7 +128,8 @@ public class AppDb extends SQLiteOpenHelper {
             AlarmDeviceTable.COLUMN_IS_BATTERY_LOW      + " INTEGER, " +
             AlarmDeviceTable.COLUMN_IS_POWER_LOST       + " INTEGER, " +
             AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED    + " INTEGER, " +
-            AlarmDeviceTable.COLUMN_IS_DEV_FAILURE      + " INTEGER" +
+            AlarmDeviceTable.COLUMN_IS_DEV_FAILURE      + " INTEGER, " +
+            AlarmDeviceTable.COLUMN_MONEY_LEFT          + " REAL" +
                                                         "); ";
 
 

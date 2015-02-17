@@ -35,7 +35,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
     private TextView devName;
     private TextView devInfo;
     private ImageView devLockIcon;
-    private ImageView imgOnlineIndicator;
+    private ImageView imgMoneyIndicator;
     private ImageView imgBatteryIndicator;
     private ImageView imgPowerIndicator;
     private ImageView imgTamperIndicator;
@@ -70,7 +70,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
         devName = (TextView) findViewById(R.id.text_device_name);
         devInfo = (TextView) findViewById(R.id.text_device_info);
         devLockIcon = (ImageView) findViewById(R.id.image_lock_icon);
-        imgOnlineIndicator = (ImageView) findViewById(R.id.image_online_indicator);
+        imgMoneyIndicator = (ImageView) findViewById(R.id.image_money_indicator);
         imgBatteryIndicator = (ImageView) findViewById(R.id.image_battery_indicator);
         imgPowerIndicator = (ImageView) findViewById(R.id.image_power_indicator);
         imgTamperIndicator = (ImageView) findViewById(R.id.image_tamper_indicator);
@@ -688,7 +688,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
         } else {
             devLockIcon.clearAnimation();
         }
-        //imgOnlineIndicator.setImageResource(getAlarmDevice().getOnlineImgResourceId());
+        imgMoneyIndicator.setImageResource(getAlarmDevice().getMoneyImgResourceId());
         imgBatteryIndicator.setImageResource(getAlarmDevice().getBatteryImgResourceId());
         imgPowerIndicator.setImageResource(getAlarmDevice().getPowerImgResourceId());
         imgTamperIndicator.setImageResource(getAlarmDevice().getTamperImgResourceId());

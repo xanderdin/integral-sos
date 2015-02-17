@@ -98,6 +98,8 @@ public class AlarmDevice implements Comparable {
     private Boolean isPowerLost;
     private Boolean isDevFailure;
 
+    private Double moneyLeft;
+
     private final SortedSet<AlarmDeviceZone> zones = Collections.synchronizedSortedSet(new TreeSet<AlarmDeviceZone>());
 
     private String lastEventText;
@@ -127,11 +129,11 @@ public class AlarmDevice implements Comparable {
 
         String projection[] = {
                 AppDb.AlarmDeviceTable.COLUMN_ID,
-                AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY,
                 AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED,
                 AppDb.AlarmDeviceTable.COLUMN_IS_BATTERY_LOW,
                 AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                 AppDb.AlarmDeviceTable.COLUMN_IS_DEV_FAILURE,
+                AppDb.AlarmDeviceTable.COLUMN_MONEY_LEFT,
         };
 
         String selection = AppDb.AlarmDeviceTable.COLUMN_CONTACT_LOOKUP_KEY + " = ?";
@@ -151,6 +153,7 @@ public class AlarmDevice implements Comparable {
             if (!cursor.isNull(2)) isBatteryLow = (cursor.getInt(2) != 0);
             if (!cursor.isNull(3)) isPowerLost = (cursor.getInt(3) != 0);
             if (!cursor.isNull(4)) isDevFailure = (cursor.getInt(4) != 0);
+            if (!cursor.isNull(5)) moneyLeft = cursor.getDouble(5);
 
         } else {
 
@@ -379,6 +382,10 @@ public class AlarmDevice implements Comparable {
         MiscProviderFunc.setProviderStringValue(getContext(), devUri, column, val);
     }
 
+    private void setProviderDoubleValue(String column, Double val) {
+        MiscProviderFunc.setProviderDoubleValue(getContext(), devUri, column, val);
+    }
+
     private void setIsTamperOpened(Boolean val) {
         setProviderBooleanValue(AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED, val);
         isTamperOpened = val;
@@ -426,6 +433,14 @@ public class AlarmDevice implements Comparable {
         return contactLookupKey;
     }
 
+    public Double getMoneyLeft() {
+        return moneyLeft;
+    }
+
+    public void setMoneyLeft(Double moneyLeft) {
+        setProviderDoubleValue(AppDb.AlarmDeviceTable.COLUMN_MONEY_LEFT, moneyLeft);
+        this.moneyLeft = moneyLeft;
+    }
 
     public synchronized SortedSet<AlarmDeviceZone> getZones() {
         return zones;
@@ -789,6 +804,19 @@ public class AlarmDevice implements Comparable {
 
                 infoSb.append(getContext().getString(R.string.MSG_Balance)).append(": ").append(m.group(2)).append(" ").append(m.group(3));
 
+                Double money = null;
+
+                try {
+                    money = Double.valueOf(m.group(2).replace(",", "."));
+                } catch (Exception e) {
+                }
+
+                setMoneyLeft(money);
+
+                if (null != money && money < CommonVar.getLowMoneyThreshold()) {
+                    eventHistoryType = AppDb.EventHistoryTable.EVENT_TYPE_WARNING;
+                }
+
             } else {
                 infoSb.append(text);
             }
@@ -1051,5 +1079,26 @@ public class AlarmDevice implements Comparable {
 
     public int getTamperImgResourceId() {
         return getTamperImgResourceId(getIsTamperOpened());
+    }
+
+
+    public static int getMoneyImgResourceId(Double moneyLeft, double moneyThreshold) {
+
+        int res;
+
+        if (null == moneyLeft) {
+            res = R.drawable.ic_action_question;
+        } else if (moneyLeft < moneyThreshold) {
+            res = R.drawable.ic_action_money_low;
+        } else {
+            res = R.drawable.ic_action_money_ok;
+        }
+
+        return res;
+    }
+
+
+    public int getMoneyImgResourceId() {
+        return getMoneyImgResourceId(getMoneyLeft(), CommonVar.getLowMoneyThreshold());
     }
 }

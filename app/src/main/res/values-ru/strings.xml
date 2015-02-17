@@ -43,6 +43,7 @@
 
     <string name="pref_device_title">Приборы</string>
     <string name="pref_max_history_records_title">Длина истории</string>
+    <string name="pref_low_money_threshold_title">Порог денежных средств</string>
     <string name="pref_sound_settings_title">Звуки</string>
     <string name="pref_uri_sound_alarm_title">Тревога</string>
     <string name="pref_uri_sound_info_title">Уведомление</string>

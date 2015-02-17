@@ -27,6 +27,13 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
         }
         CommonVar.setMaxHistoryRecords(Integer.valueOf(val));
 
+        val = sp.getString(CommonDef.PREF_KEY_LOW_MONEY_THRESHOLD,
+                String.valueOf(CommonDef.PREF_VAL_LOW_MONEY_THRESHOLD));
+        if (TextUtils.isEmpty(val)) {
+            val = "0";
+        }
+        CommonVar.setLowMoneyThreshold(Double.valueOf(val));
+
         initSoundDefaultPreferences(sp);
         initSounds();
 
@@ -97,6 +104,13 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
                 val = "0";
             }
             CommonVar.setMaxHistoryRecords(Integer.valueOf(val));
+        } else if (CommonDef.PREF_KEY_LOW_MONEY_THRESHOLD.equals(key)) {
+            String val = sharedPreferences.getString(CommonDef.PREF_KEY_LOW_MONEY_THRESHOLD,
+                    String.valueOf(CommonDef.PREF_VAL_LOW_MONEY_THRESHOLD));
+            if (TextUtils.isEmpty(val)) {
+                val = "0";
+            }
+            CommonVar.setLowMoneyThreshold(Double.valueOf(val));
         }
     }
 }

@@ -43,6 +43,7 @@
 
     <string name="pref_device_title">Panels</string>
     <string name="pref_max_history_records_title">History length</string>
+    <string name="pref_low_money_threshold_title">Money threshold</string>
     <string name="pref_sound_settings_title">Sounds</string>
     <string name="pref_uri_sound_alarm_title">Alarm</string>
     <string name="pref_uri_sound_info_title">Notification</string>

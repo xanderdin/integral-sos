@@ -43,6 +43,7 @@ public class MainActivity extends AbstractAppActivity
                 AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                 AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED,
                 AppDb.AlarmDeviceTable.COLUMN_IS_DEV_FAILURE,
+                AppDb.AlarmDeviceTable.COLUMN_MONEY_LEFT,
         };
 
         int to[] = {
@@ -53,6 +54,7 @@ public class MainActivity extends AbstractAppActivity
                 R.id.image_power_indicator,
                 R.id.image_tamper_indicator,
                 R.id.image_failure_indicator,
+                R.id.image_money_indicator,
         };
 
         deviceListAdapter = new SimpleCursorAdapter(
@@ -117,6 +119,7 @@ public class MainActivity extends AbstractAppActivity
                         AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                         AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED,
                         AppDb.AlarmDeviceTable.COLUMN_IS_DEV_FAILURE,
+                        AppDb.AlarmDeviceTable.COLUMN_MONEY_LEFT,
                 };
 
                 sortOrder = AppDb.AlarmDeviceTable.COLUMN_SORT_ORDER;
@@ -262,11 +265,12 @@ public class MainActivity extends AbstractAppActivity
 
                     return true;
 
-                case R.id.image_online_indicator:
+                case R.id.image_money_indicator:
 
-                    val = (cursor.isNull(columnIndex)) ? null : (cursor.getInt(columnIndex) != 0);
+                    Double money = (cursor.isNull(columnIndex)) ? null : cursor.getDouble(columnIndex);
 
-                    //((ImageView) view).setImageResource(AlarmDevice.getOnlineImgResourceId(val));
+                    ((ImageView) view).setImageResource(AlarmDevice.getMoneyImgResourceId(money,
+                            CommonVar.getLowMoneyThreshold()));
 
                     return true;
 

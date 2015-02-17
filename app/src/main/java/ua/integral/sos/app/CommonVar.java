@@ -22,6 +22,8 @@ public class CommonVar {
 
     private static int maxHistoryRecords;
 
+    private static double lowMoneyThreshold;
+
     private static int deviceDetailSelectedTabIdx;
 
     public synchronized static int getDeviceDetailSelectedTabIdx() {
@@ -38,6 +40,14 @@ public class CommonVar {
 
     public synchronized static void setMaxHistoryRecords(int maxHistoryRecords) {
         CommonVar.maxHistoryRecords = maxHistoryRecords;
+    }
+
+    public synchronized static double getLowMoneyThreshold() {
+        return lowMoneyThreshold;
+    }
+
+    public synchronized static void setLowMoneyThreshold(double lowMoneyThreshold) {
+        CommonVar.lowMoneyThreshold = lowMoneyThreshold;
     }
 
     public synchronized static Uri getAlarmSoundUri() {

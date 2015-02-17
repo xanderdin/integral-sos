@@ -36,7 +36,7 @@
             android:src="@drawable/ic_action_question"/>
 
         <ImageView
-            android:id="@+id/image_online_indicator"
+            android:id="@+id/image_money_indicator"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:scaleType="center"
@@ -58,7 +58,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:scaleType="center"
-            android:layout_below="@id/image_online_indicator"
+            android:layout_below="@id/image_money_indicator"
             android:layout_toLeftOf="@id/image_power_indicator"
             android:src="@drawable/ic_action_question"/>
 
@@ -77,7 +77,7 @@
             android:layout_width="wrap_content"
             android:layout_height="32dp"
             android:layout_toRightOf="@id/image_lock_icon"
-            android:layout_toLeftOf="@id/image_online_indicator"
+            android:layout_toLeftOf="@id/image_money_indicator"
             android:layout_alignTop="@id/image_lock_icon"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -91,7 +91,7 @@
             android:layout_width="fill_parent"
             android:layout_height="32dp"
             android:layout_toRightOf="@id/image_lock_icon"
-            android:layout_toLeftOf="@id/image_online_indicator"
+            android:layout_toLeftOf="@id/image_money_indicator"
             android:layout_below="@id/text_device_name"
             android:layout_alignBottom="@id/image_lock_icon"
             android:gravity="center"

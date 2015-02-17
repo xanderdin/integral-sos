@@ -25,6 +25,11 @@ public class MiscProviderFunc {
     }
 
 
+    public static void setProviderDoubleValue(final Context ctx, final Uri uri, final String col, final Double val) {
+        setProviderValue(ctx, uri, col, val);
+    }
+
+
     private static void setProviderValue(final Context ctx, final Uri uri, final String col, final Object val) {
 
         final ContentValues values = new ContentValues();
@@ -48,6 +53,10 @@ public class MiscProviderFunc {
         } else if (val instanceof Long) {
 
             values.put(col, (Long) val);
+
+        } else if (val instanceof Double) {
+
+            values.put(col, (Double) val);
 
         } else {
 
