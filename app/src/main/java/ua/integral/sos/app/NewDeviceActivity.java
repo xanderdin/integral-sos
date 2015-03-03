@@ -81,6 +81,8 @@ public class NewDeviceActivity extends ActionBarActivity {
             case R.id.button_add_contact:
                 addContact();
                 break;
+            default:
+                break;
         }
     }
 
@@ -119,6 +121,8 @@ public class NewDeviceActivity extends ActionBarActivity {
             case ADD_CONTACT:
             case GET_CONTACT:
                 getContactData(uri);
+                break;
+            default:
                 break;
         }
     }

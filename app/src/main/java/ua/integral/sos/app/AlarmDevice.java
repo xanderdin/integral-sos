@@ -163,7 +163,7 @@ public class AlarmDevice implements Comparable {
 
             devUri = getContentResolver().insert(AlarmDeviceProvider.CONTENT_URI, values);
 
-            rowId = Long.valueOf(devUri.getPathSegments().get(1));
+            rowId = Long.parseLong(devUri.getPathSegments().get(1));
         }
 
         cursor.close();

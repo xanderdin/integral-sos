@@ -23,9 +23,9 @@ public class SoundPickerDialog extends DialogPreference implements AdapterView.O
 
     private final static String TAG = "SoundChooserDialog";
 
-    private final String TAB_SUPPLIED = "supplied";
-    private final String TAB_INTERNAL = "internal";
-    private final String TAB_EXTERNAL = "external";
+    private final static String TAB_SUPPLIED = "supplied";
+    private final static String TAB_INTERNAL = "internal";
+    private final static String TAB_EXTERNAL = "external";
 
     private final Uri URI_SUPPLIED = Uri.parse("android.resource://" + getContext().getPackageName());
     private final Uri URI_INTERNAL = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
@@ -159,7 +159,7 @@ public class SoundPickerDialog extends DialogPreference implements AdapterView.O
 
                 String sound = Uri.parse(val).getLastPathSegment();
 
-                long id = Long.valueOf(sound);
+                long id = Long.parseLong(sound);
 
                 internalCursor.moveToFirst();
                 internalCursor.moveToPrevious();
@@ -196,7 +196,7 @@ public class SoundPickerDialog extends DialogPreference implements AdapterView.O
 
                 String sound = Uri.parse(val).getLastPathSegment();
 
-                long id = Long.valueOf(sound);
+                long id = Long.parseLong(sound);
 
                 externalCursor.moveToFirst();
                 externalCursor.moveToPrevious();

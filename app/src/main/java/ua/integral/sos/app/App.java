@@ -25,7 +25,7 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
         if (TextUtils.isEmpty(val)) {
             val = "0";
         }
-        CommonVar.setMaxHistoryRecords(Integer.valueOf(val));
+        CommonVar.setMaxHistoryRecords(Integer.parseInt(val));
 
         val = sp.getString(CommonDef.PREF_KEY_LOW_MONEY_THRESHOLD,
                 String.valueOf(CommonDef.PREF_VAL_LOW_MONEY_THRESHOLD));
@@ -103,7 +103,7 @@ public class App extends Application implements SharedPreferences.OnSharedPrefer
             if (TextUtils.isEmpty(val)) {
                 val = "0";
             }
-            CommonVar.setMaxHistoryRecords(Integer.valueOf(val));
+            CommonVar.setMaxHistoryRecords(Integer.parseInt(val));
         } else if (CommonDef.PREF_KEY_LOW_MONEY_THRESHOLD.equals(key)) {
             String val = sharedPreferences.getString(CommonDef.PREF_KEY_LOW_MONEY_THRESHOLD,
                     String.valueOf(CommonDef.PREF_VAL_LOW_MONEY_THRESHOLD));

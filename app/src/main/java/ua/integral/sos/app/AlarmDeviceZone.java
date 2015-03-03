@@ -88,7 +88,7 @@ public class AlarmDeviceZone implements Comparable {
 
             zoneUri = getContentResolver().insert(AlarmDeviceZoneProvider.CONTENT_URI, values);
 
-            rowId = Long.valueOf(zoneUri.getPathSegments().get(1));
+            rowId = Long.parseLong(zoneUri.getPathSegments().get(1));
         }
 
         cursor.close();

@@ -336,6 +336,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case R.id.zone_list:
                 showZoneInfo(id);
                 break;
+            default:
+                break;
         }
     }
 
@@ -417,6 +419,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case LOADER_ID_HISTORY:
                 historyListAdapter.swapCursor(data);
                 break;
+            default:
+                break;
         }
     }
 
@@ -430,6 +434,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
             case LOADER_ID_HISTORY:
                 historyListAdapter.swapCursor(null);
                 break;
+            default:
+                break;
         }
     }
 
@@ -437,6 +443,8 @@ public class DeviceDetailActivity extends AbstractAppActivity
         switch (v.getId()) {
             case R.id.layout_device_header:
                 finish();
+                break;
+            default:
                 break;
         }
     }

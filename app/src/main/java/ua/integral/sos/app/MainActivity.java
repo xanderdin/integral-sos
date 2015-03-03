@@ -87,6 +87,8 @@ public class MainActivity extends AbstractAppActivity
             case R.id.device_list:
                 displayDeviceDetail(id);
                 break;
+            default:
+                break;
         }
     }
 
@@ -139,6 +141,8 @@ public class MainActivity extends AbstractAppActivity
             case LOADER_ID_DEVICES:
                 deviceListAdapter.swapCursor(data);
                 break;
+            default:
+                break;
         }
     }
 
@@ -147,6 +151,8 @@ public class MainActivity extends AbstractAppActivity
         switch (loader.getId()) {
             case LOADER_ID_DEVICES:
                 deviceListAdapter.swapCursor(null);
+                break;
+            default:
                 break;
         }
     }
@@ -172,6 +178,8 @@ public class MainActivity extends AbstractAppActivity
         switch (v.getId()) {
             case R.id.button_add_device:
                 startNewDeviceActivity();
+                break;
+            default:
                 break;
         }
     }

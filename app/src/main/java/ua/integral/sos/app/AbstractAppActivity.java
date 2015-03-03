@@ -100,6 +100,8 @@ public class AbstractAppActivity extends ActionBarActivity
             case R.id.zone_list:
                 inflater.inflate(R.menu.context_zone, menu);
                 break;
+            default:
+                break;
         }
     }
 
@@ -299,7 +301,7 @@ public class AbstractAppActivity extends ActionBarActivity
         this.name = name;
     }
 
-    protected Dialog getDialog() {
+    protected synchronized Dialog getDialog() {
         return dialog;
     }
 

@@ -20,8 +20,8 @@ android {
         applicationId "ua.integral.sos.app"
         minSdkVersion 8
         targetSdkVersion 21
-        versionCode 7
-        versionName "0.4.1"
+        versionCode 8
+        versionName "0.4.2"
     }
     buildTypes {
         release {
