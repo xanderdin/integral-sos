@@ -68,7 +68,7 @@
             android:layout_height="32dp"
             android:layout_below="@id/image_zone_battery_indicator"
             android:layout_alignParentRight="true"
-            android:id="@+id/image_zone_tamper_indicator"
+            android:id="@+id/image_zone_power_indicator"
             android:src="@drawable/ic_action_question"
             android:scaleType="center"/>
 
@@ -76,6 +76,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_view_zone_battery_status"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/image_zone_power_indicator"
+            android:layout_alignBottom="@id/image_zone_power_indicator"
+            android:id="@+id/text_view_zone_power_status"
+            android:text="@string/text_view_zone_power_status"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:gravity="center_vertical"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+    <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@id/image_zone_power_indicator"
+            android:layout_alignParentRight="true"
+            android:id="@+id/image_zone_tamper_indicator"
+            android:src="@drawable/ic_action_question"
+            android:scaleType="center"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_view_zone_power_status"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@id/image_zone_tamper_indicator"
             android:layout_alignBottom="@id/image_zone_tamper_indicator"
@@ -87,26 +110,26 @@
             android:ellipsize="end"/>
 
     <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_below="@id/image_zone_tamper_indicator"
-                android:layout_alignParentRight="true"
-                android:id="@+id/image_zone_failure_indicator"
-                android:src="@drawable/ic_action_question"
-                android:scaleType="center"/>
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@id/image_zone_tamper_indicator"
+            android:layout_alignParentRight="true"
+            android:id="@+id/image_zone_failure_indicator"
+            android:src="@drawable/ic_action_question"
+            android:scaleType="center"/>
 
     <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/text_view_zone_tamper_status"
-                android:layout_alignParentLeft="true"
-                android:layout_toLeftOf="@id/image_zone_failure_indicator"
-                android:layout_alignBottom="@id/image_zone_failure_indicator"
-                android:id="@+id/text_view_zone_failure_status"
-                android:text="@string/text_view_zone_failure_status"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:gravity="center_vertical"
-                android:singleLine="true"
-                android:ellipsize="end"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_view_zone_tamper_status"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/image_zone_failure_indicator"
+            android:layout_alignBottom="@id/image_zone_failure_indicator"
+            android:id="@+id/text_view_zone_failure_status"
+            android:text="@string/text_view_zone_failure_status"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:gravity="center_vertical"
+            android:singleLine="true"
+            android:ellipsize="end"/>
 
 </RelativeLayout>

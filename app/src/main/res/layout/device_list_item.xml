@@ -16,6 +16,15 @@
         android:scaleType="center"/>
 
     <ImageView
+        android:id="@+id/image_attention_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_action_attention"
+        android:layout_alignLeft="@id/image_lock_icon"
+        android:layout_alignTop="@id/image_lock_icon"
+        android:visibility="gone"/>
+
+    <ImageView
         android:id="@+id/image_tamper_indicator"
         android:layout_width="32dp"
         android:layout_height="32dp"

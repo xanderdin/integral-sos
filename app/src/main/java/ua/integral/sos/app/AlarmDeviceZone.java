@@ -11,20 +11,27 @@ import android.text.TextUtils;
 /**
  * Created by aledin on 26.01.15.
  */
-public class AlarmDeviceZone implements Comparable {
+public class AlarmDeviceZone implements Comparable<AlarmDeviceZone> {
 
     public final static int ST_OK     = 0;
     public final static int ST_SHORT  = 1;
     public final static int ST_TORN   = 2;
 
+    public final static int TYPE_NONE      = 0;
+    public final static int TYPE_DETECTOR  = 1;
+    public final static int TYPE_SIREN     = 2;
+
     private final long devId;
 
     private final int zoneNum;
+    private int zoneType             = TYPE_DETECTOR;
+
     private Integer zoneState;
     private Boolean isArmed;
     private Boolean isFired;
     private Boolean isTamperOpened;
     private Boolean isBatteryLow;
+    private Boolean isPowerLost;
     private Boolean isLinkLost;
     private Boolean isZoneFailure;
     private String zoneName;
@@ -46,12 +53,14 @@ public class AlarmDeviceZone implements Comparable {
 
         String projection[] = {
                 AppDb.AlarmDeviceZoneTable.COLUMN_ID,
+                AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_TYPE,
                 AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_NAME,
                 AppDb.AlarmDeviceZoneTable.COLUMN_STATE,
                 AppDb.AlarmDeviceZoneTable.COLUMN_IS_ARMED,
                 AppDb.AlarmDeviceZoneTable.COLUMN_IS_FIRED,
                 AppDb.AlarmDeviceZoneTable.COLUMN_IS_TAMPER_OPENED,
                 AppDb.AlarmDeviceZoneTable.COLUMN_IS_BATTERY_LOW,
+                AppDb.AlarmDeviceZoneTable.COLUMN_IS_POWER_LOST,
                 AppDb.AlarmDeviceZoneTable.COLUMN_IS_LINK_LOST,
                 AppDb.AlarmDeviceZoneTable.COLUMN_IS_ZONE_FAILURE,
         };
@@ -70,14 +79,16 @@ public class AlarmDeviceZone implements Comparable {
 
             zoneUri = ContentUris.withAppendedId(AlarmDeviceZoneProvider.CONTENT_URI_ID_BASE, rowId);
 
-            if (!cursor.isNull(1)) zoneName = cursor.getString(1);
-            if (!cursor.isNull(2)) zoneState = cursor.getInt(2);
-            if (!cursor.isNull(3)) isArmed = (cursor.getInt(3) != 0);
-            if (!cursor.isNull(4)) isFired = (cursor.getInt(4) != 0);
-            if (!cursor.isNull(5)) isTamperOpened = (cursor.getInt(5) != 0);
-            if (!cursor.isNull(6)) isBatteryLow = (cursor.getInt(6) != 0);
-            if (!cursor.isNull(7)) isLinkLost = (cursor.getInt(7) != 0);
-            if (!cursor.isNull(8)) isZoneFailure = (cursor.getInt(8) != 0);
+            if (!cursor.isNull(1)) zoneType = cursor.getInt(1);
+            if (!cursor.isNull(2)) zoneName = cursor.getString(2);
+            if (!cursor.isNull(3)) zoneState = cursor.getInt(3);
+            if (!cursor.isNull(4)) isArmed = (cursor.getInt(4) != 0);
+            if (!cursor.isNull(5)) isFired = (cursor.getInt(5) != 0);
+            if (!cursor.isNull(6)) isTamperOpened = (cursor.getInt(6) != 0);
+            if (!cursor.isNull(7)) isBatteryLow = (cursor.getInt(7) != 0);
+            if (!cursor.isNull(8)) isPowerLost = (cursor.getInt(8) != 0);
+            if (!cursor.isNull(9)) isLinkLost = (cursor.getInt(9) != 0);
+            if (!cursor.isNull(10)) isZoneFailure = (cursor.getInt(10) != 0);
 
         } else {
 
@@ -126,6 +137,16 @@ public class AlarmDeviceZone implements Comparable {
 
     public long getRowId() {
         return rowId;
+    }
+
+    public int getZoneType() {
+        return zoneType;
+    }
+
+    public void setZoneType(Integer zoneType) {
+        int t = (zoneType == null) ? TYPE_DETECTOR : zoneType;
+        setProviderIntegerValue(AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_TYPE, t);
+        this.zoneType = t;
     }
 
     public Integer getZoneState() {
@@ -180,6 +201,16 @@ public class AlarmDeviceZone implements Comparable {
     public void setIsBatteryLow(Boolean isBatteryLow) {
         setProviderBooleanValue(AppDb.AlarmDeviceZoneTable.COLUMN_IS_BATTERY_LOW, isBatteryLow);
         this.isBatteryLow = isBatteryLow;
+    }
+
+    public Boolean getIsPowerLost() {
+        return isPowerLost;
+    }
+
+
+    public void setIsPowerLost(Boolean isPowerLost) {
+        setProviderBooleanValue(AppDb.AlarmDeviceZoneTable.COLUMN_IS_POWER_LOST, isPowerLost);
+        this.isPowerLost = isPowerLost;
     }
 
 
@@ -251,30 +282,77 @@ public class AlarmDeviceZone implements Comparable {
     }
 
 
-    @Override
-    public int compareTo(Object another) {
-
-        if (this.zoneNum < ((AlarmDeviceZone) another).zoneNum) {
-            return -1;
-        } else if (this.zoneNum > ((AlarmDeviceZone) another).zoneNum) {
-            return 1;
-        }
-
-        return 0;
+    private int compareToNum(AlarmDeviceZone that) {
+        return this.zoneNum < that.zoneNum ? -1 : this.zoneNum > that.zoneNum ? 1 : 0;
     }
 
-    public static int getImgResourceId(Boolean isArmed, boolean isInAlarm) {
+    @Override
+    public int compareTo(AlarmDeviceZone that) {
+
+        if (this.equals(that)) return 0;
+
+        long id1 = this.devId;
+        long id2 = that.devId;
+
+        int res = id1 > id2 ? 1 : id1 < id2 ? -1 : 0;
+
+        if (res == 0) return compareToNum(that);
+
+        return res;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AlarmDeviceZone)) return false;
+
+        AlarmDeviceZone that = (AlarmDeviceZone) o;
+
+        if (this.devId != that.devId) return false;
+        if (this.zoneNum != that.zoneNum) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (devId ^ (devId >>> 32));
+        result = 31 * result + zoneNum;
+        return result;
+    }
+
+
+    public static int getImgResourceId(int type, Boolean isArmed, boolean isInAlarm) {
 
         int res;
 
-        if (null == isArmed) {
-            res = R.drawable.ic_question;
-        } else if (isArmed && isInAlarm) {
-            res = R.drawable.ic_lock_broken;
-        } else if (isArmed) {
-            res = R.drawable.ic_lock_closed;
-        } else {
-            res = R.drawable.ic_lock_opened;
+        switch (type) {
+
+            case AlarmDeviceZone.TYPE_DETECTOR:
+
+                if (null == isArmed) {
+                    res = R.drawable.ic_question;
+                } else if (isArmed && isInAlarm) {
+                    res = R.drawable.ic_lock_broken;
+                } else if (isArmed) {
+                    res = R.drawable.ic_lock_closed;
+                } else {
+                    res = R.drawable.ic_lock_opened;
+                }
+
+                break;
+
+            case AlarmDeviceZone.TYPE_SIREN:
+
+                res = R.drawable.ic_bell;
+
+                break;
+
+            default:
+
+                res = R.drawable.ic_question;
+
+                break;
         }
 
         return res;
@@ -282,7 +360,7 @@ public class AlarmDeviceZone implements Comparable {
 
 
     public int getImgResourceId() {
-        return getImgResourceId(getIsArmed(), isInAlarm());
+        return getImgResourceId(getZoneType(), getIsArmed(), isInAlarm());
     }
 
 
@@ -325,6 +403,27 @@ public class AlarmDeviceZone implements Comparable {
 
     public int getBatteryImgResourceId() {
         return getBatteryImgResourceId(getIsBatteryLow());
+    }
+
+
+    public static int getPowerImgResourceId(Boolean isPowerLost) {
+
+        int res;
+
+        if (null == isPowerLost) {
+            res = R.drawable.ic_action_dash;
+        } else if (isPowerLost) {
+            res = R.drawable.ic_action_power_lost;
+        } else {
+            res = R.drawable.ic_action_power_ok;
+        }
+
+        return res;
+    }
+
+
+    public int getPowerImgResourceId() {
+        return getPowerImgResourceId(getIsPowerLost());
     }
 
 
@@ -371,6 +470,7 @@ public class AlarmDeviceZone implements Comparable {
     public static boolean hasAttentionInfo(Boolean isTamperOpened,
                                            Boolean isLinkLost,
                                            Boolean isBatteryLow,
+                                           Boolean isPowerLost,
                                            Boolean isZoneFailure) {
 
         if (null != isTamperOpened && isTamperOpened == true) {
@@ -385,6 +485,10 @@ public class AlarmDeviceZone implements Comparable {
             return true;
         }
 
+        if (null != isPowerLost && isPowerLost == true) {
+            return true;
+        }
+
         if (null != isZoneFailure && isZoneFailure == true) {
             return true;
         }
@@ -394,7 +498,8 @@ public class AlarmDeviceZone implements Comparable {
 
 
     public boolean hasAttentionInfo() {
-        return hasAttentionInfo(getIsTamperOpened(), getIsLinkLost(), getIsBatteryLow(), getIsZoneFailure());
+        return hasAttentionInfo(getIsTamperOpened(), getIsLinkLost(), getIsBatteryLow(),
+                getIsPowerLost(), getIsZoneFailure());
     }
 
 
@@ -409,6 +514,10 @@ public class AlarmDeviceZone implements Comparable {
         }
 
         if (null != isBatteryLow) {
+            return true;
+        }
+
+        if (null != isPowerLost) {
             return true;
         }
 

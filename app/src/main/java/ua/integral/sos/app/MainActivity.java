@@ -39,6 +39,7 @@ public class MainActivity extends AbstractAppActivity
                 AppDb.AlarmDeviceTable.COLUMN_ID, // for text_device_info
                 AppDb.AlarmDeviceTable.COLUMN_ID, // for text_device_name
                 AppDb.AlarmDeviceTable.COLUMN_ID, // for image_lock_icon
+                AppDb.AlarmDeviceTable.COLUMN_ID, // for image_attention_icon
                 AppDb.AlarmDeviceTable.COLUMN_IS_BATTERY_LOW,
                 AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                 AppDb.AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED,
@@ -50,6 +51,7 @@ public class MainActivity extends AbstractAppActivity
                 R.id.text_device_info,
                 R.id.text_device_name,
                 R.id.image_lock_icon,
+                R.id.image_attention_icon,
                 R.id.image_battery_indicator,
                 R.id.image_power_indicator,
                 R.id.image_tamper_indicator,
@@ -265,10 +267,28 @@ public class MainActivity extends AbstractAppActivity
 
                     ((ImageView) view).setImageResource(alarmDevice.getLockImgResourceId());
 
-                    if (alarmDevice.isInAlarm()) {
+                    if (!alarmDevice.isDeviceOff() && alarmDevice.isInAlarm()) {
                         view.setAnimation(AnimationUtils.loadAnimation(MainActivity.this, R.anim.shake));
                     } else {
                         view.clearAnimation();
+                    }
+
+                    return true;
+
+                case R.id.image_attention_icon:
+
+                    idx = cursor.getColumnIndex(AppDb.AlarmDeviceTable.COLUMN_ID);
+
+                    alarmDevice = AlarmDeviceList.getAlarmDeviceByRowId(cursor.getLong(idx));
+
+                    if (null == alarmDevice) {
+                        return true;
+                    }
+
+                    if (alarmDevice.hasZonesAttentionInfo()) {
+                        view.setVisibility(View.VISIBLE);
+                    } else {
+                        view.setVisibility(View.INVISIBLE);
                     }
 
                     return true;

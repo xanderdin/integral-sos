@@ -35,6 +35,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
     private TextView devName;
     private TextView devInfo;
     private ImageView devLockIcon;
+    private ImageView imgAttentionIndicator;
     private ImageView imgMoneyIndicator;
     private ImageView imgBatteryIndicator;
     private ImageView imgPowerIndicator;
@@ -70,6 +71,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
         devName = (TextView) findViewById(R.id.text_device_name);
         devInfo = (TextView) findViewById(R.id.text_device_info);
         devLockIcon = (ImageView) findViewById(R.id.image_lock_icon);
+        imgAttentionIndicator = (ImageView) findViewById(R.id.image_attention_icon);
         imgMoneyIndicator = (ImageView) findViewById(R.id.image_money_indicator);
         imgBatteryIndicator = (ImageView) findViewById(R.id.image_battery_indicator);
         imgPowerIndicator = (ImageView) findViewById(R.id.image_power_indicator);
@@ -358,6 +360,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
                 projection = new String[] {
                         AppDb.AlarmDeviceZoneTable.COLUMN_ID,
                         AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_NUM,
+                        AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_TYPE,
                         AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_NAME,
                         AppDb.AlarmDeviceZoneTable.COLUMN_STATE,
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_ARMED,
@@ -456,17 +459,23 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
             int idx;
 
+            int type;
             Boolean isArmed;
             Boolean isFired;
             Boolean isInAlarm;
             Boolean isTamperOpened;
             Boolean isLinkLost;
             Boolean isBatteryLow;
+            Boolean isPowerLost;
             Boolean isZoneFailure;
 
             switch (view.getId()) {
 
                 case R.id.zone_lock_icon:
+
+                    idx = cursor.getColumnIndex(AppDb.AlarmDeviceZoneTable.COLUMN_ZONE_TYPE);
+
+                    type = cursor.getInt(idx);
 
                     idx = cursor.getColumnIndex(AppDb.AlarmDeviceZoneTable.COLUMN_IS_ARMED);
 
@@ -486,7 +495,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
                     isInAlarm = AlarmDeviceZone.isInAlarm(isArmed, isFired, isTamperOpened, isLinkLost);
 
-                    ((ImageView) view).setImageResource(AlarmDeviceZone.getImgResourceId(isArmed, isInAlarm));
+                    ((ImageView) view).setImageResource(AlarmDeviceZone.getImgResourceId(type, isArmed, isInAlarm));
 
                     if (isInAlarm) {
                         view.setAnimation(AnimationUtils.loadAnimation(DeviceDetailActivity.this, R.anim.shake));
@@ -497,6 +506,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
                     return true;
 
                 case R.id.zone_attention_icon:
+
                     idx = cursor.getColumnIndex(AppDb.AlarmDeviceZoneTable.COLUMN_IS_TAMPER_OPENED);
 
                     isTamperOpened = (cursor.isNull(idx)) ? null : (cursor.getInt(idx) != 0);
@@ -509,12 +519,16 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
                     isBatteryLow = (cursor.isNull(idx)) ? null : (cursor.getInt(idx) != 0);
 
+                    idx = cursor.getColumnIndex(AppDb.AlarmDeviceZoneTable.COLUMN_IS_POWER_LOST);
+
+                    isPowerLost = (cursor.isNull(idx)) ? null : (cursor.getInt(idx) != 0);
+
                     idx = cursor.getColumnIndex(AppDb.AlarmDeviceZoneTable.COLUMN_IS_ZONE_FAILURE);
 
                     isZoneFailure = (cursor.isNull(idx)) ? null : (cursor.getInt(idx) != 0);
 
                     boolean hasAttentionInfo = AlarmDeviceZone.hasAttentionInfo(isTamperOpened, isLinkLost,
-                            isBatteryLow, isZoneFailure);
+                            isBatteryLow, isPowerLost, isZoneFailure);
 
                     if (hasAttentionInfo) {
                         view.setVisibility(View.VISIBLE);
@@ -623,11 +637,13 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         final ImageView linkIndicator = (ImageView) dialogView.findViewById(R.id.image_zone_link_indicator);
         final ImageView batteryIndicator = (ImageView) dialogView.findViewById(R.id.image_zone_battery_indicator);
+        final ImageView powerIndicator = (ImageView) dialogView.findViewById(R.id.image_zone_power_indicator);
         final ImageView tamperIndicator = (ImageView) dialogView.findViewById(R.id.image_zone_tamper_indicator);
         final ImageView failureIndicator = (ImageView) dialogView.findViewById(R.id.image_zone_failure_indicator);
 
         final TextView linkTextView = (TextView) dialogView.findViewById(R.id.text_view_zone_link_status);
         final TextView batteryTextView = (TextView) dialogView.findViewById(R.id.text_view_zone_battery_status);
+        final TextView powerTextView = (TextView) dialogView.findViewById(R.id.text_view_zone_power_status);
         final TextView tamperTextView = (TextView) dialogView.findViewById(R.id.text_view_zone_tamper_status);
         final TextView failureTextView = (TextView) dialogView.findViewById(R.id.text_view_zone_failure_status);
         final TextView noInfoTextView = (TextView) dialogView.findViewById(R.id.text_view_zone_no_info);
@@ -635,15 +651,18 @@ public class DeviceDetailActivity extends AbstractAppActivity
         if (alarmDeviceZone.hasAdditionalInfo()) {
             linkIndicator.setImageResource(alarmDeviceZone.getLinkImgResourceId());
             batteryIndicator.setImageResource(alarmDeviceZone.getBatteryImgResourceId());
+            powerIndicator.setImageResource(alarmDeviceZone.getPowerImgResourceId());
             tamperIndicator.setImageResource(alarmDeviceZone.getTamperImgResourceId());
             failureIndicator.setImageResource(alarmDeviceZone.getZoneFailureImgResourceId());
         } else {
             linkIndicator.setVisibility(View.GONE);
             batteryIndicator.setVisibility(View.GONE);
+            powerIndicator.setVisibility(View.GONE);
             tamperIndicator.setVisibility(View.GONE);
             failureIndicator.setVisibility(View.GONE);
             linkTextView.setVisibility(View.GONE);
             batteryTextView.setVisibility(View.GONE);
+            powerTextView.setVisibility(View.GONE);
             tamperTextView.setVisibility(View.GONE);
             failureTextView.setVisibility(View.GONE);
             noInfoTextView.setVisibility(View.VISIBLE);
@@ -691,11 +710,18 @@ public class DeviceDetailActivity extends AbstractAppActivity
 
         devLockIcon.setImageResource(getAlarmDevice().getLockImgResourceId());
 
-        if (getAlarmDevice().isInAlarm()) {
+        if (!getAlarmDevice().isDeviceOff() && getAlarmDevice().isInAlarm()) {
             devLockIcon.setAnimation(AnimationUtils.loadAnimation(this, R.anim.shake));
         } else {
             devLockIcon.clearAnimation();
         }
+
+        if (getAlarmDevice().hasZonesAttentionInfo()) {
+            imgAttentionIndicator.setVisibility(View.VISIBLE);
+        } else {
+            imgAttentionIndicator.setVisibility(View.GONE);
+        }
+
         imgMoneyIndicator.setImageResource(getAlarmDevice().getMoneyImgResourceId());
         imgBatteryIndicator.setImageResource(getAlarmDevice().getBatteryImgResourceId());
         imgPowerIndicator.setImageResource(getAlarmDevice().getPowerImgResourceId());

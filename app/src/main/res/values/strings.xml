@@ -55,11 +55,12 @@
     <string name="text_view_sound_selected_title">None</string>
     <string name="text_view_zone_link_status">Link status</string>
     <string name="text_view_zone_battery_status">Battery status</string>
+    <string name="text_view_zone_power_status">Power status</string>
     <string name="text_view_zone_tamper_status">Tamper status</string>
     <string name="text_view_zone_failure_status">Failure status</string>
     <string name="text_view_zone_no_info">No info</string>
     <string name="text_view_app_author">Alexander Pravdin</string>
-    <string name="text_view_app_firm">Integral, Ltd.</string>
+    <string name="text_view_app_firm">INTEGRAL</string>
     <string name="text_view_credits_title">Credits:</string>
     <string name="text_view_device_tel">Phone number</string>
     <string name="text_view_device_name">Panel name</string>

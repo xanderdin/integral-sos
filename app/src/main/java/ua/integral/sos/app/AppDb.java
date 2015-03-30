@@ -36,6 +36,7 @@ public class AppDb extends SQLiteOpenHelper {
         public final static String COLUMN_IS_BATTERY_LOW      = "isBatteryLow";
         public final static String COLUMN_IS_POWER_LOST       = "isPowerLost";
         public final static String COLUMN_IS_DEV_FAILURE      = "isDevFailure";
+        public final static String COLUMN_IS_DEVICE_OFF       = "isDeviceOff";
         public final static String COLUMN_MONEY_LEFT          = "moneyLeft";
 
         public final static String COLUMNS[] = {
@@ -47,6 +48,7 @@ public class AppDb extends SQLiteOpenHelper {
                 COLUMN_IS_BATTERY_LOW,
                 COLUMN_IS_POWER_LOST,
                 COLUMN_IS_DEV_FAILURE,
+                COLUMN_IS_DEVICE_OFF,
                 COLUMN_MONEY_LEFT,
         };
     }
@@ -65,6 +67,7 @@ public class AppDb extends SQLiteOpenHelper {
         public final static String COLUMN_ID                  = "_id";
         public final static String COLUMN_DEV_ID              = "devId";
         public final static String COLUMN_ZONE_NUM            = "zoneNum";
+        public final static String COLUMN_ZONE_TYPE           = "zoneType";
         public final static String COLUMN_ZONE_NAME           = "zoneName";
         public final static String COLUMN_SORT_ORDER          = "sortOrder";
         public final static String COLUMN_STATE               = "state";
@@ -72,6 +75,7 @@ public class AppDb extends SQLiteOpenHelper {
         public final static String COLUMN_IS_FIRED            = "isFired";
         public final static String COLUMN_IS_TAMPER_OPENED    = "isTamperOpened";
         public final static String COLUMN_IS_BATTERY_LOW      = "isBatteryLow";
+        public final static String COLUMN_IS_POWER_LOST       = "isPowerLost";
         public final static String COLUMN_IS_LINK_LOST        = "isLinkLost";
         public final static String COLUMN_IS_ZONE_FAILURE     = "isZoneFailure";
 
@@ -79,6 +83,7 @@ public class AppDb extends SQLiteOpenHelper {
                 COLUMN_ID,
                 COLUMN_DEV_ID,
                 COLUMN_ZONE_NUM,
+                COLUMN_ZONE_TYPE,
                 COLUMN_ZONE_NAME,
                 COLUMN_SORT_ORDER,
                 COLUMN_STATE,
@@ -86,6 +91,7 @@ public class AppDb extends SQLiteOpenHelper {
                 COLUMN_IS_FIRED,
                 COLUMN_IS_TAMPER_OPENED,
                 COLUMN_IS_BATTERY_LOW,
+                COLUMN_IS_POWER_LOST,
                 COLUMN_IS_LINK_LOST,
                 COLUMN_IS_ZONE_FAILURE,
         };
@@ -129,6 +135,7 @@ public class AppDb extends SQLiteOpenHelper {
             AlarmDeviceTable.COLUMN_IS_POWER_LOST       + " INTEGER, " +
             AlarmDeviceTable.COLUMN_IS_TAMPER_OPENED    + " INTEGER, " +
             AlarmDeviceTable.COLUMN_IS_DEV_FAILURE      + " INTEGER, " +
+            AlarmDeviceTable.COLUMN_IS_DEVICE_OFF       + " INTEGER, " +
             AlarmDeviceTable.COLUMN_MONEY_LEFT          + " REAL" +
                                                         "); ";
 
@@ -151,6 +158,7 @@ public class AppDb extends SQLiteOpenHelper {
             AlarmDeviceZoneTable.COLUMN_ID                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             AlarmDeviceZoneTable.COLUMN_DEV_ID             + " INTEGER NOT NULL, " +
             AlarmDeviceZoneTable.COLUMN_ZONE_NUM           + " INTEGER NOT NULL, " +
+            AlarmDeviceZoneTable.COLUMN_ZONE_TYPE          + " INTEGER NOT NULL DEFAULT " + AlarmDeviceZone.TYPE_DETECTOR + "," +
             AlarmDeviceZoneTable.COLUMN_ZONE_NAME          + " TEXT, " +
             AlarmDeviceZoneTable.COLUMN_SORT_ORDER         + " INTEGER, " +
             AlarmDeviceZoneTable.COLUMN_STATE              + " INTEGER, " +
@@ -158,6 +166,7 @@ public class AppDb extends SQLiteOpenHelper {
             AlarmDeviceZoneTable.COLUMN_IS_FIRED           + " INTEGER, " +
             AlarmDeviceZoneTable.COLUMN_IS_TAMPER_OPENED   + " INTEGER, " +
             AlarmDeviceZoneTable.COLUMN_IS_BATTERY_LOW     + " INTEGER, " +
+            AlarmDeviceZoneTable.COLUMN_IS_POWER_LOST      + " INTEGER, " +
             AlarmDeviceZoneTable.COLUMN_IS_LINK_LOST       + " INTEGER, " +
             AlarmDeviceZoneTable.COLUMN_IS_ZONE_FAILURE    + " INTEGER" +
                                                              "); ";

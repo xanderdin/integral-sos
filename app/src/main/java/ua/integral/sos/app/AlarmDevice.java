@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 /**
  * Created by aledin on 26.01.15.
  */
-public class AlarmDevice implements Comparable {
+public class AlarmDevice implements Comparable<AlarmDevice> {
 
     private final static String PATTERN_USER                = "((\\s+(P|П)([0-9]{1,2})){0,1})";
     private final static String PATTERN_ZONES               = "((:([0-9]{1,2}(,[0-9]{1,2}){0,15})){0,1})";
@@ -29,6 +29,7 @@ public class AlarmDevice implements Comparable {
     private final static String PATTERN_MSG_NAPADENIE       = "(NAPADENIE|НАПАДЕНИЕ)" + PATTERN_USER;
     private final static String PATTERN_MSG_VSKRIT          = "(VSKRIT|ВСКРЫТ)" + PATTERN_ZONES;
     private final static String PATTERN_MSG_OTKLUCHENIE     = "(OTKLUCHENIE|ОТКЛЮЧЕНИЕ)";
+    private final static String PATTERN_MSG_VKLUCHENIE      = "(VKLUCHENIE|ВКЛЮЧЕНИЕ)";
     private final static String PATTERN_MSG_ZAKRIT          = "(zakrit|закрыт)" + PATTERN_ZONES;
     private final static String PATTERN_MSG_220_NET         = "220\\s+(NET|НЕТ)";
     private final static String PATTERN_MSG_220_EST         = "220\\s+(est\\'|есть)";
@@ -51,6 +52,7 @@ public class AlarmDevice implements Comparable {
             PATTERN_MSG_NAPADENIE      + ")|(" +
             PATTERN_MSG_VSKRIT         + ")|(" +
             PATTERN_MSG_OTKLUCHENIE    + ")|(" +
+            PATTERN_MSG_VKLUCHENIE     + ")|(" +
             PATTERN_MSG_ZAKRIT         + ")|(" +
             PATTERN_MSG_220_NET        + ")|(" +
             PATTERN_MSG_220_EST        + ")|(" +
@@ -74,6 +76,7 @@ public class AlarmDevice implements Comparable {
     private final static Pattern patternMsgNapadenie     = Pattern.compile(PATTERN_MSG_NAPADENIE);
     private final static Pattern patternMsgVskrit        = Pattern.compile(PATTERN_MSG_VSKRIT);
     private final static Pattern patternMsgOtkluchenie   = Pattern.compile(PATTERN_MSG_OTKLUCHENIE);
+    private final static Pattern patternMsgVkluchenie    = Pattern.compile(PATTERN_MSG_VKLUCHENIE);
     private final static Pattern patternMsgZakrit        = Pattern.compile(PATTERN_MSG_ZAKRIT);
     private final static Pattern patternMsg220Net        = Pattern.compile(PATTERN_MSG_220_NET);
     private final static Pattern patternMsg220Est        = Pattern.compile(PATTERN_MSG_220_EST);
@@ -97,6 +100,7 @@ public class AlarmDevice implements Comparable {
     private Boolean isBatteryLow;
     private Boolean isPowerLost;
     private Boolean isDevFailure;
+    private Boolean isDeviceOff;
 
     private Double moneyLeft;
 
@@ -133,6 +137,7 @@ public class AlarmDevice implements Comparable {
                 AppDb.AlarmDeviceTable.COLUMN_IS_BATTERY_LOW,
                 AppDb.AlarmDeviceTable.COLUMN_IS_POWER_LOST,
                 AppDb.AlarmDeviceTable.COLUMN_IS_DEV_FAILURE,
+                AppDb.AlarmDeviceTable.COLUMN_IS_DEVICE_OFF,
                 AppDb.AlarmDeviceTable.COLUMN_MONEY_LEFT,
         };
 
@@ -153,7 +158,8 @@ public class AlarmDevice implements Comparable {
             if (!cursor.isNull(2)) isBatteryLow = (cursor.getInt(2) != 0);
             if (!cursor.isNull(3)) isPowerLost = (cursor.getInt(3) != 0);
             if (!cursor.isNull(4)) isDevFailure = (cursor.getInt(4) != 0);
-            if (!cursor.isNull(5)) moneyLeft = cursor.getDouble(5);
+            if (!cursor.isNull(5)) isDeviceOff = (cursor.getInt(5) != 0);
+            if (!cursor.isNull(6)) moneyLeft = cursor.getDouble(6);
 
         } else {
 
@@ -222,32 +228,6 @@ public class AlarmDevice implements Comparable {
 
 
     public String getFirstDevTel() {
-
-//        String[] projection = {
-//                ContactsContract.CommonDataKinds.Phone.NUMBER,
-//        };
-//
-//        String selection = ContactsContract.Data.LOOKUP_KEY + " = ? AND " +
-//                ContactsContract.Data.HAS_PHONE_NUMBER + " = 1";
-//
-//        String[] selectionArgs = {
-//                getContactLookupKey(),
-//        };
-//
-//        Cursor cursor = getContentResolver().query(ContactsContract.Data.CONTENT_URI,
-//                projection, selection, selectionArgs, null);
-//
-//        String res;
-//
-//        if (cursor.moveToNext()) {
-//            res = cursor.getString(0);
-//        } else {
-//            res = "";
-//        }
-//
-//        cursor.close();
-//
-//        return res;
 
         ArrayList<String> tels = getDevTels();
 
@@ -429,18 +409,32 @@ public class AlarmDevice implements Comparable {
     }
 
 
+    public boolean isDeviceOff() {
+        return isDeviceOff == null ? false : isDeviceOff;
+    }
+
+
+    public void setIsDeviceOff(Boolean val) {
+        setProviderBooleanValue(AppDb.AlarmDeviceTable.COLUMN_IS_DEVICE_OFF, val);
+        this.isDeviceOff = val;
+    }
+
+
     public String getContactLookupKey() {
         return contactLookupKey;
     }
+
 
     public Double getMoneyLeft() {
         return moneyLeft;
     }
 
+
     public void setMoneyLeft(Double moneyLeft) {
         setProviderDoubleValue(AppDb.AlarmDeviceTable.COLUMN_MONEY_LEFT, moneyLeft);
         this.moneyLeft = moneyLeft;
     }
+
 
     public synchronized SortedSet<AlarmDeviceZone> getZones() {
         return zones;
@@ -616,6 +610,14 @@ public class AlarmDevice implements Comparable {
             } else if ((m = patternMsgOtkluchenie.matcher(msg)).matches()) {
 
                 infoSb.append(getContext().getString(R.string.MSG_DeviceOff));
+
+                setIsDeviceOff(true);
+
+            } else if ((m = patternMsgVkluchenie.matcher(msg)).matches()) {
+
+                infoSb.append(getContext().getString(R.string.MSG_DeviceOn));
+
+                setIsDeviceOff(false);
 
             } else if ((m = patternMsgZakrit.matcher(msg)).matches()) {
 
@@ -991,17 +993,41 @@ public class AlarmDevice implements Comparable {
 
 
     @Override
-    public int compareTo(Object another) {
-        return this.getContactLookupKey().compareToIgnoreCase(((AlarmDevice) another).getContactLookupKey());
+    public int compareTo(AlarmDevice that) {
+        return this.getContactLookupKey().compareToIgnoreCase(that.getContactLookupKey());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AlarmDevice)) return false;
+
+        AlarmDevice that = (AlarmDevice) o;
+
+        String thisKey = this.getContactLookupKey();
+        String thatKey = that.getContactLookupKey();
+
+        if (thisKey != null ? !thisKey.equalsIgnoreCase(thatKey) : thatKey != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        String key = getContactLookupKey();
+        return key != null ? key.hashCode() : 0;
     }
 
 
-    public static int getLockImgResourceId(Boolean isSubscribed, boolean isArmed, boolean isInAlarm) {
+    public static int getLockImgResourceId(Boolean isSubscribed, boolean isDeviceOff,
+                                           boolean isArmed, boolean isInAlarm) {
 
         int res;
 
         if (null == isSubscribed || isSubscribed == false) {
             res = R.drawable.ic_question;
+        } else if (isDeviceOff) {
+            res = R.drawable.ic_device_off;
         } else if (isArmed && isInAlarm) {
             res = R.drawable.ic_lock_broken;
         } else if (isArmed) {
@@ -1015,7 +1041,7 @@ public class AlarmDevice implements Comparable {
 
 
     public int getLockImgResourceId() {
-        return getLockImgResourceId(true, isArmed(), isInAlarm());
+        return getLockImgResourceId(true, isDeviceOff(), isArmed(), isInAlarm());
     }
 
 
@@ -1100,5 +1126,20 @@ public class AlarmDevice implements Comparable {
 
     public int getMoneyImgResourceId() {
         return getMoneyImgResourceId(getMoneyLeft(), CommonVar.getLowMoneyThreshold());
+    }
+
+
+    public static boolean hasZonesAttentionInfo(Set<AlarmDeviceZone> zones) {
+        for (AlarmDeviceZone z : zones) {
+            if (z.hasAttentionInfo()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public boolean hasZonesAttentionInfo() {
+        return hasZonesAttentionInfo(getZones());
     }
 }

@@ -55,11 +55,12 @@
     <string name="text_view_sound_selected_title">Ничего</string>
     <string name="text_view_zone_link_status">Статус связи</string>
     <string name="text_view_zone_battery_status">Статус батареи</string>
+    <string name="text_view_zone_power_status">Статус питания</string>
     <string name="text_view_zone_tamper_status">Статус тампера</string>
     <string name="text_view_zone_failure_status">Наличие сбоя</string>
     <string name="text_view_zone_no_info">Нет информации</string>
     <string name="text_view_app_author">Александр Правдин</string>
-    <string name="text_view_app_firm">ПКБ Интеграл</string>
+    <string name="text_view_app_firm">ИНТЕГРАЛ</string>
     <string name="text_view_credits_title">Благодарности:</string>
     <string name="text_view_device_tel">Номер телефона</string>
     <string name="text_view_device_name">Название</string>
