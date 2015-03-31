@@ -366,6 +366,7 @@ public class DeviceDetailActivity extends AbstractAppActivity
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_ARMED,
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_FIRED,
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_BATTERY_LOW,
+                        AppDb.AlarmDeviceZoneTable.COLUMN_IS_POWER_LOST,
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_TAMPER_OPENED,
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_LINK_LOST,
                         AppDb.AlarmDeviceZoneTable.COLUMN_IS_ZONE_FAILURE,
